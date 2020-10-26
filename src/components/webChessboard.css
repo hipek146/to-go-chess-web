@@ -1,0 +1,21 @@
+.square {
+    display: inline-block;
+    height: 50px;
+    width: 12%;
+    border-color: black;
+    border-style: solid;
+    border-width: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.chessboard {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+}
