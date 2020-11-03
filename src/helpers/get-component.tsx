@@ -1,17 +1,17 @@
 import React from 'react';
 import { Piece } from '../common/pieces/piece';
-import WhitePawn from '../images/pawn_white.svg';
-import BlackPawn from '../images/pawn_black.svg';
-import WhiteRook from '../images/rook_white.svg';
-import BlackRook from '../images/rook_black.svg';
-import WhiteKnight from '../images/knight_white.svg';
-import BlackKnight from '../images/knight_black.svg';
-import WhiteBishop from '../images/bishop_white.svg';
-import BlackBishop from '../images/bishop_black.svg';
-import WhiteKing from '../images/king_white.svg';
-import BlackKing from '../images/king_black.svg';
-import WhiteQueen from '../images/queen_white.svg';
-import BlackQueen from '../images/queen_black.svg';
+import { ReactComponent as WhitePawn } from '../images/pawn_white.svg';
+import { ReactComponent as BlackPawn } from '../images/pawn_black.svg';
+import { ReactComponent as WhiteRook } from '../images/rook_white.svg';
+import { ReactComponent as BlackRook } from '../images/rook_black.svg';
+import { ReactComponent as WhiteKnight } from '../images/knight_white.svg';
+import { ReactComponent as BlackKnight } from '../images/knight_black.svg';
+import { ReactComponent as WhiteBishop } from '../images/bishop_white.svg';
+import { ReactComponent as BlackBishop } from '../images/bishop_black.svg';
+import { ReactComponent as WhiteKing } from '../images/king_white.svg';
+import { ReactComponent as BlackKing } from '../images/king_black.svg';
+import { ReactComponent as WhiteQueen } from '../images/queen_white.svg';
+import { ReactComponent as BlackQueen } from '../images/queen_black.svg';
 
 export const getComponent = (piece: Piece) => {
     if (piece === undefined) return null;
@@ -19,29 +19,29 @@ export const getComponent = (piece: Piece) => {
     let char = piece.color === 'white' ? piece.symbol.toUpperCase() : piece.symbol.toLowerCase();
     switch (char) {
         case 'P':
-            return <img src={WhitePawn} alt="WhitePawn"/>;
+            return <WhitePawn/>;
         case 'R':
-            return <img src={WhiteRook} alt="WhiteRook"/>;
+            return <WhiteRook/>;
         case 'N':
-            return <img src={WhiteKnight} alt="WhiteKnight"/>;
+            return <WhiteKnight/>;
         case 'B':
-            return <img src={WhiteBishop} alt="WhiteBishop"/>;
+            return <WhiteBishop/>;
         case 'Q':
-            return <img src={WhiteQueen} alt="WhiteQueen"/>;
+            return <WhiteQueen/>;
         case 'K':
-            return <img src={WhiteKing} alt="WhiteKing"/>;
+            return <WhiteKing/>;
         case 'p':
-            return <img src={BlackPawn} alt="BlackPawn"/>;
+            return <BlackPawn/>;
         case 'r':
-            return <img src={BlackRook} alt="BlackRook"/>;
+            return <BlackRook/>;
         case 'n':
-            return <img src={BlackKnight} alt="White Pawn"/>;
+            return <BlackKnight/>;
         case 'b':
-            return <img src={BlackBishop} alt="BlackBishop"/>;
+            return <BlackBishop/>;
         case 'q':
-            return <img src={BlackQueen} alt="BlackQueen"/>;
+            return <BlackQueen/>;
         case 'k':
-            return <img src={BlackKing} alt="BlackKing"/>;
+            return <BlackKing/>;
         default:
             return null;
     }
