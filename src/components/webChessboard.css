@@ -3,11 +3,6 @@ body {
     justify-content: center;
 }
 
-.square {
-    height: 11.7%;
-    width: 11.7%;
-}
-
 .chessboard-image {
     background-image: url('../images/chessboard.png');
     background-size: contain;
@@ -25,16 +20,21 @@ body {
     padding: 0;
 }
 
-.highlightedPiece {
+.square {
     height: 11.7%;
     width: 11.7%;
-    background-color: rgba(18, 66, 17, 0.6);
 }
 
-.highlightedSquare {
-    height: 11.7%;
-    width: 11.7%;
-    background-color: rgba(161, 148, 10, 0.6);
+.highlightedLastMove {
+    background-color: rgba(161, 148, 10, 0.6)
+}
+
+.highlightedPossibleMove {
+    background-color: rgba(22, 141, 181, 0.5)
+}
+
+.highlightedPossibleCapture {
+    background-color: rgba(204, 54, 24, 0.5)
 }
 
 img {

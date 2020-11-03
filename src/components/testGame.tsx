@@ -1,9 +1,9 @@
 import React from 'react';
-import {Subject} from 'rxjs';
-import {Game} from '../common/core/game';
-import {Chessboard} from '../common/core/chessboard';
-import {Player} from '../common/interfaces/player';
-import {WebChessboard} from './webChessboard';
+import { Subject } from 'rxjs';
+import { Game } from '../common/core/game';
+import { Chessboard } from '../common/core/chessboard';
+import { Player } from '../common/interfaces/player';
+import { WebChessboard } from './webChessboard';
 
 class ChessPlayer implements Player {
   color: 'white' | 'black';

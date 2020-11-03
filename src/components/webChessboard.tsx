@@ -4,24 +4,15 @@ import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move';
-import WhitePawn from '../images/pawn_white.svg';
-import BlackPawn from '../images/pawn_black.svg';
-import WhiteRook from '../images/rook_white.svg';
-import BlackRook from '../images/rook_black.svg';
-import WhiteKnight from '../images/knight_white.svg';
-import BlackKnight from '../images/knight_black.svg';
-import WhiteBishop from '../images/bishop_white.svg';
-import BlackBishop from '../images/bishop_black.svg';
-import WhiteKing from '../images/king_white.svg';
-import BlackKing from '../images/king_black.svg';
-import WhiteQueen from '../images/queen_white.svg';
-import BlackQueen from '../images/queen_black.svg';
+import { getComponent } from '../helpers/get-component';
 import './webChessboard.css';
+
 
 interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
 }
+
 
 interface LastMove {
     previousPosition: {
@@ -31,41 +22,17 @@ interface LastMove {
     move: Move
 }
 
-const getComponent = (piece: Piece) => {
-    if (piece === undefined) return null;
 
-    let char = piece.color === 'white' ? piece.symbol.toUpperCase() : piece.symbol.toLowerCase();
-    switch (char) {
-        case 'P':
-            return <img src={WhitePawn} alt="WhitePawn"/>;
-        case 'R':
-            return <img src={WhiteRook} alt="WhiteRook"/>;
-        case 'N':
-            return <img src={WhiteKnight} alt="WhiteKnight"/>;
-        case 'B':
-            return <img src={WhiteBishop} alt="WhiteBishop"/>;
-        case 'Q':
-            return <img src={WhiteQueen} alt="WhiteQueen"/>;
-        case 'K':
-            return <img src={WhiteKing} alt="WhiteKing"/>;
-        case 'p':
-            return <img src={BlackPawn} alt="BlackPawn"/>;
-        case 'r':
-            return <img src={BlackRook} alt="BlackRook"/>;
-        case 'n':
-            return <img src={BlackKnight} alt="White Pawn"/>;
-        case 'b':
-            return <img src={BlackBishop} alt="BlackBishop"/>;
-        case 'q':
-            return <img src={BlackQueen} alt="BlackQueen"/>;
-        case 'k':
-            return <img src={BlackKing} alt="BlackKing"/>;
-        default:
-            return null;
-    }
+interface FirstPress {
+    piece: Piece;
+    possibleMoves: Move[];
 }
 
-const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: Piece | undefined, lastMove: LastMove | undefined)  => {
+
+const getMinWindowSize = () => Math.min(window.innerHeight, window.innerWidth);
+
+
+const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined)  => {
     let items: any[] = [];
 
     for(let row = 8; row >= 1; row--) {
@@ -74,15 +41,19 @@ const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: 
             let svg = getComponent(piece);
             let symbol = piece === undefined ? 'blank' : piece.getSymbol();
 
-            const style = firstPress !== undefined && firstPress === piece ? 
-                "highlightedPiece" : (
-                    lastMove !== undefined && (lastMove.move.row === row && lastMove.move.column === column || 
-                    lastMove.previousPosition.row === row && lastMove.previousPosition.column === column) ? 
-                    "highlightedSquare" : "square"
-                )
-
+            let style = ['square'];
+            let moves = firstPress?.possibleMoves?.filter(el => el.row === row && el.column === column);
+            if (firstPress !== undefined && firstPress.piece === piece) {
+                style.push('highlightedPossibleMove');
+            } else if (moves !== undefined && moves.length > 0) {
+                style.push(moves[0].type === 'capture' ? 'highlightedPossibleCapture' : 'highlightedPossibleMove');
+            } else if (lastMove !== undefined && ((lastMove.move.row === row && lastMove.move.column === column) || 
+                (lastMove.previousPosition.row === row && lastMove.previousPosition.column === column))) {
+                style.push('highlightedLastMove');
+            } 
+            const styles = style.join(" ")
             items.push(
-                <div key={symbol + row + column} className={style} onClick={() => onClick(piece, row, column)}>
+                <div key={symbol + row + column} className={styles} onClick={() => onClick(piece, row, column)}>
                     {svg}
                 </div>
             );
@@ -92,12 +63,11 @@ const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: 
     return items;
 };
 
-const getMinWindowSize = () => Math.min(window.innerHeight, window.innerWidth);
 
 export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
-    const [firstPress, setFirstPress] = useState<Piece>();
+    const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
     const [size, setSize] = useState(getMinWindowSize());
 
@@ -110,33 +80,59 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     });
     
     const onPress = (piece: Piece, row: number, column: number) => {
-        if (piece !== undefined && firstPress === undefined && boardInfo.turn == piece.color) {
-            setFirstPress(piece);
+        if (piece === firstPress?.piece) {
+            setFirstPress(undefined);
+        } else if (piece !== undefined && boardInfo.turn == piece.color) {
+            setFirstPress({
+                piece, 
+                possibleMoves: piece.possibleMoves(boardInfo)
+            });
         } else if (firstPress !== undefined) {
-            if (firstPress === piece) {
-                setFirstPress(undefined);
-            } else {
-                const moves = firstPress.possibleMoves(boardInfo);
-                for (let move of moves) {
-                    if (move.row === row && move.column === column) {
-                        let movePGN: string = '';
-                        if (firstPress.symbol === 'p') {
-                            if ( move.type === 'capture') movePGN += 'abcdefgh'[firstPress.column - 1] + 'x';
-                        } else {
-                            movePGN += firstPress.symbol.toUpperCase();
-                            if (move.type === 'capture') movePGN += 'x';
-                        }
+            for (let move of firstPress.possibleMoves) {
+                if (move.row === row && move.column === column) {
+                    let movePGN: string = '';
+                    if (firstPress.piece.symbol === 'p') {
+                        if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
                         movePGN += 'abcdefgh'[column - 1] + row;
-                        props.onMove(movePGN)
-                        setFirstPress(undefined);
-                        setLastMove({previousPosition: {row: firstPress.row, column: firstPress.column}, move});
-                        break;
-                    }
+                        if (row === 8 && boardInfo.turn === 'white') movePGN += '=Q';
+                        if (row === 1 && boardInfo.turn === 'black') movePGN += '=Q';
+                    } else if (firstPress.piece.symbol === 'k' && move.type === 'kingsideCastle') {
+                        movePGN += 'O-O';
+                    } else if (firstPress.piece.symbol === 'k' && move.type === 'queensideCastle') {
+                        movePGN += 'O-O-O';
+                    } else {
+                        movePGN += firstPress.piece.symbol.toUpperCase();
+                        if (move.type === 'capture') movePGN += 'x';
+                        let samePieces = boardInfo.find(firstPress.piece.symbol, boardInfo.turn).filter(piece => {
+                            return piece.checkMove(boardInfo, row, column, move.type);
+                        });
+                        let toAdd = '';
+                        samePieces = samePieces.filter(piece => !(piece.column === firstPress.piece.column && piece.row == firstPress.piece.row));
+                        if (samePieces.some(piece => piece.row === firstPress.piece.row)) {
+                            toAdd += 'abcdefgh'[firstPress.piece.column - 1];
+                        } 
+                        if (samePieces.some(piece => piece.column === firstPress.piece.column)) {
+                            toAdd += firstPress.piece.row;
+                        } 
+                        if (toAdd.length === 0 && samePieces.length !== 0) {
+                            toAdd += 'abcdefgh'[firstPress.piece.column - 1];
+                        }
+                        movePGN += toAdd;
+                        movePGN += 'abcdefgh'[column - 1] + row;
+                    } 
+                    props.onMove(movePGN)
+                    setFirstPress(undefined);
+                    setLastMove({
+                        previousPosition: {
+                            row: firstPress.piece.row, 
+                            column: firstPress.piece.column
+                        }, 
+                        move
+                    });
+                    break;
                 }
             }
-        } else {
-            setFirstPress(undefined);
-        }
+        } 
     };
 
     const items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
