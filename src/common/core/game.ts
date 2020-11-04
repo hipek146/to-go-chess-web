@@ -1,5 +1,4 @@
 import { Subscription } from 'rxjs';
-import { Subscribable } from 'rxjs/Observable';
 import { Canvas } from '../interfaces/canvas';
 import { Player } from '../interfaces/player';
 import { Bishop } from '../pieces/bishop';
