@@ -7,9 +7,11 @@ Then install all dependencies by typing in console:
 npm install
 ```
 
-You need to clone https://github.com/hipek146/to-go-chess-common repository and put all the files to /src/common directory.   
-
 To run web application, execute:
 ```bash
 npm start
 ```
+
+# Heroku
+
+App is hosted on heroku: https://dashboard.heroku.com/apps/to-go-chess
