@@ -26,15 +26,23 @@ body {
 }
 
 .highlightedLastMove {
-    background-color: rgba(161, 148, 10, 0.6)
+    background-color: rgba(253, 222, 98, 0.4);
+    box-sizing: border-box;
+    border: 3px solid #3e3a3a;
 }
 
 .highlightedPossibleMove {
-    background-color: rgba(22, 141, 181, 0.5)
+    background-color: rgba(97, 194, 253, 0.6);
+    box-sizing: border-box;
+    border: 2px solid #292929;
+    border-radius: 12%;
 }
 
 .highlightedPossibleCapture {
-    background-color: rgba(204, 54, 24, 0.5)
+    background-color: rgb(210, 48, 48);
+    box-sizing: border-box;
+    border: 2px solid #292929;
+    border-radius: 12%;
 }
 
 img {
