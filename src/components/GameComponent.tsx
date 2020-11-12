@@ -23,13 +23,17 @@ interface State {
   blackPlayer: ChessPlayer;
   chessboard: Chessboard;
   currentPlayer: ChessPlayer;
+  size: number;
 }
 
-interface Props {}
+interface Props {size: number}
 
-class TestGame extends React.Component<Props, State> {
+class GameComponent extends React.Component<Props, State> {
+  divElement: HTMLDivElement;
+
   constructor(props: Props) {
     super(props);
+
     let game = new Game();
     let chessboard = new Chessboard();
     let wp = new ChessPlayer();
@@ -41,7 +45,12 @@ class TestGame extends React.Component<Props, State> {
       whitePlayer: wp,
       blackPlayer: bp,
       chessboard: chessboard,
+      size: props.size,
     };
+  }
+
+  componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any) {
+    this.setState({size: nextProps.size})
   }
 
   render() {
@@ -61,10 +70,22 @@ class TestGame extends React.Component<Props, State> {
     };
 
     return (
-      <WebChessboard onMove={onMove} chessboard={chessboard}/>
+        <div style={styles}>
+          <WebChessboard onMove={onMove} chessboard={chessboard} size={this.state.size}/>
+        </div>
     );
   }
 }
 
+const styles: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexDirection: 'column',
+  userSelect: 'none',
+}
 
-export default TestGame;
+
+export default GameComponent;
