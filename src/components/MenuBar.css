@@ -1,0 +1,19 @@
+.MenuBar {
+    background: url("../images/wood.jpg");
+    background-size: cover;
+    background-position: center;
+    border-top: 1px solid #575757;
+    border-bottom: 1px solid #575757;
+    display: flex;
+}
+.MenuBar-button {
+    flex-grow: 1;
+    height: 30px;
+    border: 1px solid #575757;
+    background: rgba(78, 219, 83, 0.55);
+    user-select: none;
+}
+.MenuBar-button:hover {
+    cursor: pointer;
+    background: rgba(97, 239, 102, 0.7);
+}
