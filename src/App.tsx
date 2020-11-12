@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {Provider, connect} from 'react-redux';
 import {createStore, applyMiddleware, bindActionCreators} from 'redux';
@@ -8,12 +8,15 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import {FirebaseAuthProvider} from "@react-firebase/auth";
 
-import TestGame from './components/testGame';
+import GameComponent from './components/GameComponent';
+import GameTree from "./components/GameTree";
 import './App.css';
 
 import reducer from './reducers';
 import {restoreUser} from "./actions";
-import SignInPanelContainer from "./components/SignInPanel";
+import AccountComponent from "./components/AccountComponent";
+import MenuBar from "./components/MenuBar";
+import MenuList from "./components/MenuList";
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
@@ -29,24 +32,47 @@ const config = {
 };
 
 function App(props) {
+    const [size, setSize] = useState(0);
+    const [openedMenu, setOpenedMenu] = useState(false);
+    const ref = useRef(null)
 
     function onAuthStateChanged(user: any) {
         props.restoreUser(user);
     }
 
+    const updateSize = () => {
+        const height = ref.current.clientHeight - 80;
+        const width = ref.current.clientWidth - 580;
+        setSize(Math.min(height, width));
+    }
+
+    const onMenuPress = (option: string) => {
+        switch (option) {
+            case 'menu':
+                setOpenedMenu(!openedMenu);
+                break;
+        }
+    }
+
     useEffect(() => {
+        updateSize();
+        window.addEventListener('resize', () => {
+            updateSize();
+        })
         const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
         return subscriber;
     }, []);
 
     return (
         <FirebaseAuthProvider firebase={firebase} {...config}>
-            <div className="App">
+            <div className="App" ref={ref}>
                 <div className="chessBoard">
-                    <TestGame/>
+                    <GameComponent size={size}/>
                 </div>
                 <div className="rightSide">
-                    <SignInPanelContainer />
+                    <AccountComponent />
+                    <MenuBar press={(option: string) => onMenuPress(option)} />
+                    {openedMenu ? <MenuList /> : <GameTree/>}
                 </div>
             </div>
         </FirebaseAuthProvider>

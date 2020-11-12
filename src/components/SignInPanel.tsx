@@ -2,6 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {connect} from "react-redux";
 import firebase from "firebase";
 import logout from "../utils/logout";
+import "./SignInPanel.css"
+import FacebookIcon from "../images/facebook_icon.png"
+import GoogleIcon from "../images/google_icon.png"
 
 const authentication = (email: string, password: string) => {
     if(!email || !password) return;
@@ -40,44 +43,40 @@ const SignInPanel = (props) => {
     return (
         props.user ?
         <>
-            {props.user.email}
-            <br />
             <button onClick={logout}>Wyloguj się</button><br/>
         </>
             :
-        <>
-            {'Niezalogowany'}
-            <br/>
+        <div className="SignInPanel">
             <input
                 placeholder="E-mail"
                 onChange={event => setEmail(event.target.value)}
                 value={email}
             />
-            <br/>
             <input
                 type="password"
                 placeholder="Hasło"
                 onChange={event => setPassword(event.target.value)}
                 value={password}
             />
-            <br/>
-            <button onClick={() => authentication(email, password)}>Zaloguj się</button><br/>
-            <button onClick={() => {
+            <div>
+                <button onClick={() => authentication(email, password)}>Zaloguj się</button>
+                <button onClick={() => signUp(email, password)}>Zarejestruj się</button>
+            </div>
+            <div className="SignInPanel-facebook" onClick={() => {
                 const facebookAuthProvider = new firebase.auth.FacebookAuthProvider();
                 facebookAuthProvider.setCustomParameters({
                     auth_type: 'reauthenticate'
                 });
                 firebase.auth().signInWithPopup(facebookAuthProvider);
-            }}>Facebook SignIn</button><br/>
-            <button onClick={() => {
+            }}><img className="SignInPanel-icon" src={FacebookIcon} />Facebook login</div>
+            <div className="SignInPanel-google" onClick={() => {
                 const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
                 googleAuthProvider.setCustomParameters({
                     prompt: 'select_account'
                 });
                 firebase.auth().signInWithPopup(googleAuthProvider);
-            }}>Google SignIn</button><br/>
-            <button onClick={() => signUp(email, password)}>Zarejestruj się</button><br/>
-        </>
+            }}><img className="SignInPanel-icon" src={GoogleIcon} />Google login</div>
+        </div>
     )
 }
 

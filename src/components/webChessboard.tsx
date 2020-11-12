@@ -11,6 +11,7 @@ import './webChessboard.css';
 interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
+    size: number;
 }
 
 
@@ -69,10 +70,9 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
-    const [size, setSize] = useState(getMinWindowSize());
+    const { size } = props;
 
     useEffect(() => {
-        window.addEventListener('resize', () => setSize(getMinWindowSize()));
         props.chessboard.callback = (newPosition) => {
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));

@@ -1,0 +1,10 @@
+.GameTree {
+    background-image: url("../images/texture-of-burnt-wood.jpg");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #575757;
+    border-radius: 6px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    margin: 15px;
+}
