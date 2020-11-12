@@ -102,11 +102,11 @@ export class King extends Piece {
                     king.move(8, 6);
                     boardInfoCopy.moved(king, 8, 5);
                     let check = boardInfoCopy.isCheck();
-                    if (!check.white) {
+                    if (!check.black) {
                         king.move(8, 7);
                         boardInfoCopy.moved(king, 8, 6);
                         let check = boardInfoCopy.isCheck();
-                        if (!check.white) {
+                        if (!check.black) {
                             moves.push({row: 8, column: 7, type: 'kingsideCastle'});
                         }
                     }
@@ -125,11 +125,11 @@ export class King extends Piece {
                     king.move(8, 4);
                     boardInfoCopy.moved(king, 8, 5);
                     let check = boardInfoCopy.isCheck();
-                    if (!check.white) {
+                    if (!check.black) {
                         king.move(8, 3);
                         boardInfoCopy.moved(king, 1, 4);
                         let check = boardInfoCopy.isCheck();
-                        if (!check.white) {
+                        if (!check.black) {
                             moves.push({row: 8, column: 3, type: 'queensideCastle'});
                         }
                     }

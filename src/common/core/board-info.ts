@@ -50,7 +50,7 @@ export class BoardInfo {
         for (let row = 0; row < 8; row++) {
             for (let column = 0; column < 8; column++) {
                 const piece = this.board[row][column];
-                if (piece?.color === color && piece?.symbol === symbol) {
+                if (piece && piece.color === color && piece.symbol === symbol) {
                     pieces.push(this.board[row][column]);
                 }
             }
@@ -117,6 +117,18 @@ export class BoardInfo {
         return {white, black};
     }
 
+    hasMoves(color: string): boolean {
+        for (let row = 0; row < 8; row++) {
+            for (let column = 0; column < 8; column++) {
+                const piece = this.board[row][column];
+                if (piece && piece.color === color && piece.possibleMoves(this).length) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     fromFEN(positionFEN: string) {
         let column = 1;
         let row = 8;
@@ -130,7 +142,7 @@ export class BoardInfo {
             }
             const number = Number(positionFEN[i]);
             if (isNaN(number)) {
-                this.set(this.mapToPiece(positionFEN[i], row, column));;
+                this.set(this.mapToPiece(positionFEN[i], row, column));
                 column++;
             }
             else {
@@ -149,7 +161,7 @@ export class BoardInfo {
             black: {kingside: false, queenside: false}
         }
         if(castlingFEN !== '-') {
-            while (positionFEN[i] != ' ') {
+            while (positionFEN[i] !== ' ') {
                 switch (positionFEN[i]) {
                     case 'K':
                         this.castlingAvailability.white.kingside = true;
@@ -239,7 +251,7 @@ export class BoardInfo {
             + this.fullmoveNumber;
 	}
 
-    private mapToPiece(letter: string, row: number, column: number) {
+    mapToPiece(letter: string, row: number, column: number) {
 		const color = letter.toUpperCase() === letter ? 'white' : 'black';
 		const config: PieceConfig = {
 			color, row, column

@@ -1,13 +1,6 @@
 import { Subscription } from 'rxjs';
 import { Canvas } from '../interfaces/canvas';
 import { Player } from '../interfaces/player';
-import { Bishop } from '../pieces/bishop';
-import { King } from '../pieces/king';
-import { Knight } from '../pieces/knight';
-import { Pawn } from '../pieces/pawn';
-import { PieceConfig } from '../pieces/piece-config';
-import { Queen } from '../pieces/queen';
-import { Rook } from '../pieces/rook';
 import { BoardInfo } from './board-info';
 
 export class Game {
@@ -17,14 +10,10 @@ export class Game {
 
 	private canvas: Canvas;
 
-	private turn: Player;
-
 	private positionFEN: string;
 
 	private boardInfo: BoardInfo;
 
-	private halfmoveClock: number;
-	private fullmoveNumber: number;
 
 	private whiteSubscription: Subscription;
 	private blackSubscription: Subscription;
@@ -40,7 +29,7 @@ export class Game {
 
 		this.positionFEN = config.positionFEN || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-		this.updateGameWithFEN();
+		this.boardInfo.fromFEN(this.positionFEN);
 
 		if (this.whiteSubscription) this.whiteSubscription.unsubscribe();
 		if (this.blackSubscription) this.blackSubscription.unsubscribe();
@@ -56,10 +45,10 @@ export class Game {
 
 
 	private onMove(player: Player, move: string) {
-		if (this.turn === player) {
+		if (this.boardInfo.turn === player.color) {
 			try {
 				move = this.changePosition(move);
-				this.updateFENWithGame();
+				this.positionFEN = this.boardInfo.toFEN();
 				this.canvas.draw(this.positionFEN);
 
 				if (player.color === 'white') {
@@ -92,11 +81,11 @@ export class Game {
 	}
 
 	private changeTurn() {
-		if (this.turn.color === 'white') {
-			this.turn = this.blackPlayer;
+		if (this.boardInfo.turn === 'white') {
+			this.boardInfo.turn = 'black';
 		}
 		else {
-			this.turn = this.whitePlayer;
+			this.boardInfo.turn = 'white';
 		}
 	}
 
@@ -104,43 +93,20 @@ export class Game {
 		if (!move) throw new Error ('blank move');
 
 		if (move === 'O-O' || move === 'O-O+' || move === 'O-O#') {
-			const row = this.turn.color === 'white' ? 1 : 8;
-			let king = this.boardInfo.find('k', this.turn.color).filter(piece => {
+			const row = this.boardInfo.turn === 'white' ? 1 : 8;
+			let king = this.boardInfo.find('k', this.boardInfo.turn).filter(piece => {
 				return piece.checkMove(this.boardInfo, row, 7, 'kingsideCastle');
 			});
 			if (king[0]) {
 				king[0].move(row, 7);
 				this.boardInfo.moved(king[0], row, 5);
 				const rook = this.boardInfo.get(row, 8);
-				rook.move(row, 6);;
+				rook.move(row, 6);
 				this.boardInfo.moved(rook, row, 8);
-				if (this.turn.color === 'white') {
-					this.boardInfo.castlingAvailability.white = {kingside: false, queenside: false};
-				}
-				else {
-					this.boardInfo.castlingAvailability.black = {kingside: false, queenside: false};
-				}
-				this.check = false;
-				this.mate = false;
-				const check = this.boardInfo.isCheck();
-				if (check.black || check.white) {
-					this.check = true;
-				}
-				const whiteKing = this.boardInfo.find('k', 'white')[0];
-				const blackKing = this.boardInfo.find('k', 'black')[0];
-				if (whiteKing.possibleMoves(this.boardInfo).length === 0 || blackKing.possibleMoves(this.boardInfo).length === 0) {
-					this.mate = true;
-				}
-				this.boardInfo.enPassant = {
-					row: undefined,
-					column: undefined,
-				};
-				this.halfmoveClock++;
-				if (this.turn.color === 'black') {
-					this.fullmoveNumber++;
-				}
-				move = move.slice(0, 3);
-				this.changeTurn();
+
+				this.clearCastling(this.boardInfo.turn);
+				this.boardInfo.halfmoveClock++;
+				this.finishMove();
 				return move;
 			}
 			else {
@@ -148,43 +114,20 @@ export class Game {
 			}
 		}
 		if (move === 'O-O-O' || move === 'O-O-O+' || move === 'O-O-O#') {
-			const row = this.turn.color === 'white' ? 1 : 8;
-			let king = this.boardInfo.find('k', this.turn.color).filter(piece => {
+			const row = this.boardInfo.turn === 'white' ? 1 : 8;
+			let king = this.boardInfo.find('k', this.boardInfo.turn).filter(piece => {
 				return piece.checkMove(this.boardInfo, row, 3, 'queensideCastle');
 			});
 			if (king[0]) {
 				king[0].move(row, 3);
 				this.boardInfo.moved(king[0], row, 5);
 				const rook = this.boardInfo.get(row, 1);
-				rook.move(row, 4);;
+				rook.move(row, 4);
 				this.boardInfo.moved(rook, row, 1);
-				if (this.turn.color === 'white') {
-					this.boardInfo.castlingAvailability.white = {kingside: false, queenside: false};
-				}
-				else {
-					this.boardInfo.castlingAvailability.black = {kingside: false, queenside: false};
-				}
-				this.check = false;
-				this.mate = false;
-				const check = this.boardInfo.isCheck();
-				if (check.black || check.white) {
-					this.check = true;
-				}
-				const whiteKing = this.boardInfo.find('k', 'white')[0];
-				const blackKing = this.boardInfo.find('k', 'black')[0];
-				if (whiteKing.possibleMoves(this.boardInfo).length === 0 || blackKing.possibleMoves(this.boardInfo).length === 0) {
-					this.mate = true;
-				}
-				this.boardInfo.enPassant = {
-					row: undefined,
-					column: undefined,
-				};
-				this.halfmoveClock++;
-				if (this.turn.color === 'black') {
-					this.fullmoveNumber++;
-				}
-				move = move.slice(0, 5);
-				this.changeTurn();
+
+				this.clearCastling(this.boardInfo.turn);
+				this.boardInfo.halfmoveClock++;
+				this.finishMove();
 				return move;
 			}
 			else {
@@ -213,15 +156,23 @@ export class Game {
 				specifiedRow = Number(move[offset]);
 			}
 			else {
-				const specifieLetter = move[offset].charCodeAt(0) - 'a'.charCodeAt(0) + 1;
-				if (specifieLetter >= 1 && specifieLetter <= 8) {
-					specifiedColumn = specifieLetter;
+				const specifiedLetter = move[offset].charCodeAt(0) - 'a'.charCodeAt(0) + 1;
+				if (specifiedLetter >= 1 && specifiedLetter <= 8) {
+					specifiedColumn = specifiedLetter;
 				}
 				else {
 					throw new Error ('invalid move');
 				}
 			}
 			offset++;
+		}
+		else if(move[offset] !== 'x' && ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'x'].includes(move[offset + 2])) {
+			specifiedColumn = move[offset].charCodeAt(0) - 'a'.charCodeAt(0) + 1;
+			specifiedRow = Number(move[offset + 1]);
+			if (specifiedRow > 8 || specifiedRow < 1 || specifiedColumn > 8 || specifiedColumn < 1) {
+				throw new Error('invalid move');
+			}
+			offset += 2;
 		}
 
 		if (move[offset] === 'x') {
@@ -234,10 +185,10 @@ export class Game {
 		const destinationRow = Number(move[offset]);
 		offset++;
 
-		move = move.slice(0, offset);
 
 		if (symbol === 'p' && move[offset] === '=' && ['Q', 'R', 'N', 'B'].includes(move[offset + 1])) {
-			promotion = this.turn.color === 'white' ? move[offset + 1] : move[offset + 1].toLowerCase();
+			promotion = this.boardInfo.turn === 'white' ? move[offset + 1] : move[offset + 1].toLowerCase();
+			offset += 2;
 		}
 
 		if (symbol === 'p' && (destinationRow === 1 || destinationRow === 8) && !promotion) {
@@ -248,14 +199,17 @@ export class Game {
 			throw new Error ('invalid move');
 		}
 
-		let pieces = this.boardInfo.find(symbol, this.turn.color).filter(piece => {
+		move = move.slice(0, offset);
+
+		let pieces = this.boardInfo.find(symbol, this.boardInfo.turn).filter(piece => {
 				return piece.checkMove(this.boardInfo, destinationRow, destinationColumn, type);
 		});
 		pieces = pieces.filter(piece =>{
-			if(specifiedRow) return piece.row === specifiedRow;
+			if(specifiedRow && specifiedColumn) return piece.row === specifiedRow && piece.column === specifiedColumn;
+			else if(specifiedRow) return piece.row === specifiedRow;
 			else if(specifiedColumn) return piece.column === specifiedColumn;
 			else return true;
-		})
+		});
 		if (pieces.length !== 1) {
 			throw new Error ('invalid move');
 		}
@@ -264,17 +218,15 @@ export class Game {
 		const oldColumn = piece.column;
 
 		if (promotion) {
-			piece = this.mapToPiece(promotion, destinationRow, destinationColumn);
+			piece = this.boardInfo.mapToPiece(promotion, destinationRow, destinationColumn);
 		}
-		
+
 		piece.move(destinationRow, destinationColumn);
 		this.boardInfo.moved(piece, oldRow, oldColumn);
-		if (symbol === 'p' && type === 'capture' 
+		if (symbol === 'p' && type === 'capture'
 			&& destinationColumn === this.boardInfo.enPassant.column && destinationRow === this.boardInfo.enPassant.row ) {
 				this.boardInfo.capture(piece.color === 'white' ? 5 : 4, destinationColumn)
 			}
-		
-		this.boardInfo = this.boardInfo;
 
 		this.boardInfo.enPassant = {
 			row: undefined,
@@ -285,52 +237,26 @@ export class Game {
 				column: destinationColumn,
 				row: piece.color === 'white' ? 3 : 6
 			};
-			let checkPawn = this.boardInfo.get(destinationRow, destinationColumn + 1);
-			if (checkPawn && checkPawn.color !== piece.color) {
-				const boardInfoCopy = this.boardInfo.copy();
-				const piece = checkPawn.copy();
-				const pieceOldRow = piece.row;
-				const pieceOldColumn = piece.column;
-				piece.move(enPassant.row, enPassant.column);
-				boardInfoCopy.moved(piece, pieceOldRow, pieceOldColumn);
-				boardInfoCopy.capture(piece.color === 'white' ? 5 : 4, enPassant.column);
-				const check = boardInfoCopy.isCheck();
-				if ((checkPawn.color === 'white' && !check.white) || (checkPawn.color === 'black' && !check.black)) {
-					this.boardInfo.enPassant = enPassant;
+			for (let j = destinationColumn - 1; j <= destinationColumn + 1; j += 2) {
+				let checkPawn = this.boardInfo.get(destinationRow, j);
+				if (checkPawn && checkPawn.color !== piece.color) {
+					const boardInfoCopy = this.boardInfo.copy();
+					const piece = checkPawn.copy();
+					const pieceOldRow = piece.row;
+					const pieceOldColumn = piece.column;
+					piece.move(enPassant.row, enPassant.column);
+					boardInfoCopy.moved(piece, pieceOldRow, pieceOldColumn);
+					boardInfoCopy.capture(piece.color === 'white' ? 5 : 4, enPassant.column);
+					const check = boardInfoCopy.isCheck();
+					if ((checkPawn.color === 'white' && !check.white) || (checkPawn.color === 'black' && !check.black)) {
+						this.boardInfo.enPassant = enPassant;
+					}
 				}
-			}
-			checkPawn = this.boardInfo.get(destinationRow, destinationColumn - 1);
-			if (checkPawn && checkPawn.color !== piece.color) {
-				const boardInfoCopy = this.boardInfo.copy();
-				const piece = checkPawn.copy();
-				const pieceOldRow = piece.row;
-				const pieceOldColumn = piece.column;
-				piece.move(enPassant.row, enPassant.column);
-				boardInfoCopy.moved(piece, pieceOldRow, pieceOldColumn);
-				boardInfoCopy.capture(piece.color === 'white' ? 5 : 4, enPassant.column);
-				const check = boardInfoCopy.isCheck();
-				if ((checkPawn.color === 'white' && !check.white) || (checkPawn.color === 'black' && !check.black)) {
-					this.boardInfo.enPassant = enPassant;
-				}
-			}
-		}
-
-		this.check = false;
-		this.mate = false;
-		const check = this.boardInfo.isCheck();
-		if (check.black || check.white) {
-			this.check = true;
-		}
-		const whiteKing = this.boardInfo.find('k', 'white')[0];
-		const blackKing = this.boardInfo.find('k', 'black')[0];
-		if (whiteKing.possibleMoves(this.boardInfo).length === 0 || blackKing.possibleMoves(this.boardInfo).length === 0) {
-			if (this.check) {
-				this.mate = true;
 			}
 		}
 
 		if (symbol === 'k') {
-			if (this.turn.color === 'white') {
+			if (this.boardInfo.turn === 'white') {
 				this.boardInfo.castlingAvailability.white = {kingside: false, queenside: false};
 			}
 			else {
@@ -338,7 +264,7 @@ export class Game {
 			}
 		}
 		if (symbol === 'r') {
-			if (this.turn.color === 'white') {
+			if (this.boardInfo.turn === 'white') {
 				if (oldColumn === 8 && oldRow === 1) {
 					this.boardInfo.castlingAvailability.white.kingside = false;
 				}
@@ -356,169 +282,42 @@ export class Game {
 			}
 		}
 
-		if (piece.getSymbol() !== 'p' && type !== 'capture') {
-			this.halfmoveClock++;
+		if (symbol !== 'p' && type !== 'capture') {
+			this.boardInfo.halfmoveClock++;
 		}
 		else {
-			this.halfmoveClock = 0;
+			this.boardInfo.halfmoveClock = 0;
 		}
 
-		if (this.turn.color === 'black') {
-			this.fullmoveNumber++;
-		}
-
-		this.changeTurn();
+		this.finishMove();
 		return move;
 	}
 
-	private updateGameWithFEN() {
-		const positionFEN = this.positionFEN;
-
-		//this.pieces = [];
-
-		let column = 1;
-		let row = 8;
-		let i: number;
-
-		for(i = 0; positionFEN[i] !== ' '; i++) {
-			if(positionFEN[i] === '/') {
-				row--;
-				column = 1;
-				continue;
-			}
-			const number = Number(positionFEN[i]);
-			if (isNaN(number)) {
-				this.boardInfo.set(this.mapToPiece(positionFEN[i], row, column));;
-				column++;
-			}
-			else {
-				column += number;
-			}
+	finishMove(): void {
+		this.check = false;
+		this.mate = false;
+		const check = this.boardInfo.isCheck();
+		if (check.black || check.white) {
+			this.check = true;
 		}
 
-		i++;
-		if (positionFEN[i] === 'w') {
-			this.turn = this.whitePlayer;
+		if (this.check) {
+			this.mate = !this.boardInfo.hasMoves(this.boardInfo.turn === 'white' ? 'black' : 'white');
+		}
+
+		if (this.boardInfo.turn === 'black') {
+			this.boardInfo.fullmoveNumber++;
+		}
+
+		this.changeTurn();
+	}
+
+	clearCastling(color: string) {
+		if (color === 'white') {
+			this.boardInfo.castlingAvailability.white = {kingside: false, queenside: false};
 		}
 		else {
-			this.turn = this.blackPlayer;
-		}
-		i+=2;
-		const endCastlingIndex = positionFEN.indexOf(' ', i);
-		const castlingFEN = positionFEN.substring(i, endCastlingIndex);
-		this.boardInfo.castlingAvailability = {
-			white: {kingside: false, queenside: false},
-			black: {kingside: false, queenside: false}
-		}
-		if(castlingFEN !== '-') {
-			while (positionFEN[i] != ' ') {
-				switch (positionFEN[i]) {
-					case 'K':
-						this.boardInfo.castlingAvailability.white.kingside = true;
-						break;
-					case 'Q':
-						this.boardInfo.castlingAvailability.white.queenside = true;
-						break;
-					case 'k':
-						this.boardInfo.castlingAvailability.black.kingside = true;
-						break;
-					case 'q':
-						this.boardInfo.castlingAvailability.black.queenside = true;
-						break;
-				}
-				i++;
-			}
-			i--;
-		}
-		i+=2;
-		if (positionFEN[i] !== '-') {
-			const column = positionFEN[i].charCodeAt(0) - 'a'.charCodeAt(0) + 1;
-			i++;
-			const row = Number(positionFEN[i])
-			this.boardInfo.enPassant = {row, column};
-		}
-		i+=2;
-		const endHalfmoveIndex = positionFEN.indexOf(' ', i);
-		const halfmoveFEN = positionFEN.substring(i, endHalfmoveIndex);
-		this.halfmoveClock = Number(halfmoveFEN);
-		i = endHalfmoveIndex + 1;
-		
-		const fullmoveFEN = positionFEN.substring(i);
-		this.fullmoveNumber = Number(fullmoveFEN);
-	}
-
-	private updateFENWithGame() {
-		let FEN = '';
-		for (let row = 8; row > 0; row--) {
-			let blank = 0;
-			for (let column = 1; column <= 8; column++) {
-				let piece = this.boardInfo.get(row, column);
-				if (piece) {
-					if (blank) {
-						FEN += blank;
-					}
-					FEN += piece.color === 'white' ?
-						piece.getSymbol().toUpperCase() : piece.getSymbol().toLowerCase();
-					blank = 0;
-				}
-				else {
-					blank++;
-				}
-			}
-			if (blank) {
-				FEN += blank;
-			}
-			if (row > 1) {
-				FEN += '/'
-			}
-		}
-
-		let castlingAvailability = '';
-		castlingAvailability += this.boardInfo.castlingAvailability.white.kingside ? 'K' : '';
-		castlingAvailability += this.boardInfo.castlingAvailability.white.queenside ? 'Q' : '';
-		castlingAvailability += this.boardInfo.castlingAvailability.black.kingside ? 'k' : '';
-		castlingAvailability += this.boardInfo.castlingAvailability.black.queenside ? 'q' : '';
-
-		if (!castlingAvailability) {
-			castlingAvailability = '-'
-		}
-
-		let enPassant: string;
-		if (!this.boardInfo.enPassant.row || !this.boardInfo.enPassant.column) {
-			enPassant = '-';
-		}
-		else {
-			enPassant = String.fromCharCode('a'.charCodeAt(0) + this.boardInfo.enPassant.column - 1)
-				+ this.boardInfo.enPassant.row;
-		}
-
-		this.positionFEN = FEN + ' ' 
-			+ (this.turn.color === 'white' ? 'w' : 'b') + ' '
-			+ castlingAvailability + ' '
-			+ enPassant + ' '
-			+ this.halfmoveClock + ' '
-			+ this.fullmoveNumber;
-	}
-
-	private mapToPiece(letter: string, row: number, column: number) {
-		const color = letter.toUpperCase() === letter ? 'white' : 'black';
-		const config: PieceConfig = {
-			color, row, column
-		}
-		switch (letter.toLowerCase()) {
-			case 'r':
-				return new Rook(config);
-			case 'n':
-				return new Knight(config);
-			case 'b':
-				return new Bishop(config);
-			case 'q':
-				return new Queen(config);
-			case 'k':
-				return new King(config);
-			default:
-				return new Pawn(config);
+			this.boardInfo.castlingAvailability.black = {kingside: false, queenside: false};
 		}
 	}
-
 }
