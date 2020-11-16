@@ -17,6 +17,7 @@ import {restoreUser} from "./actions";
 import AccountComponent from "./components/AccountComponent";
 import MenuBar from "./components/MenuBar";
 import MenuList from "./components/MenuList";
+import Dialog from "./components/Dialog";
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
@@ -72,8 +73,9 @@ function App(props) {
                 <div className="rightSide">
                     <AccountComponent />
                     <MenuBar press={(option: string) => onMenuPress(option)} />
-                    {openedMenu ? <MenuList /> : <GameTree/>}
+                    {openedMenu ? <MenuList back={() => setOpenedMenu(false)}/> : <GameTree/>}
                 </div>
+                {props.dialog.content && <Dialog />}
             </div>
         </FirebaseAuthProvider>
     );
@@ -89,9 +91,10 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {user, isLoading, isSignout, stackLoading} = state.app;
+    const {user, dialog, isLoading, isSignout, stackLoading} = state.app;
     return {
         user,
+        dialog,
         isLoading,
         isSignout,
         stackLoading,

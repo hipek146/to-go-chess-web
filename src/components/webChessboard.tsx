@@ -1,4 +1,5 @@
 import React from 'react';
+import { Subject } from 'rxjs';
 import { useEffect, useState, FunctionComponent } from 'react';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
@@ -12,6 +13,8 @@ interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
     size: number;
+    turn: 'white' | 'black';
+    clearBoard: Subject<void>;
 }
 
 
@@ -78,11 +81,19 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };
     });
+
+    useEffect(() => {
+        props.clearBoard.subscribe(() => {
+            setFirstPress(undefined);
+            setLastMove(undefined);
+        });
+        return props.clearBoard.unsubscribe;
+    }, []);
     
     const onPress = (piece: Piece, row: number, column: number) => {
         if (piece === firstPress?.piece) {
             setFirstPress(undefined);
-        } else if (piece !== undefined && boardInfo.turn == piece.color) {
+        } else if (piece !== undefined && props.turn == piece.color && boardInfo.turn === piece.color) {
             setFirstPress({
                 piece, 
                 possibleMoves: piece.possibleMoves(boardInfo)

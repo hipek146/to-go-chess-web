@@ -1,0 +1,34 @@
+.MenuList-header {
+    border-bottom: 2px solid #707070;
+    box-shadow: 0 4px 4px -4px #707070;
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 25%;
+    padding: 6px;
+    padding-left: 14px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.MenuList-button {
+    background-color: #b8e5f3;
+    border: 2px solid #707070;
+    border-left: none;
+    box-shadow: 0 0 3px 0 #707070;
+    margin-right: 10%;
+    margin-top: 12px;
+    padding: 8px;
+    font-weight: bold;
+}
+.MenuList-button:hover {
+    background-color: #d4f3fd;
+    cursor: pointer;
+}
+
+.MenuList-button-settings {
+    background-color: #ecead1;
+}
+.MenuList-button-settings:hover {
+    background-color: #f5f3e1;
+}
