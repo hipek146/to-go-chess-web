@@ -20,7 +20,11 @@ const MenuList = (props) => {
         props.openDialog(
             <div>
                 Wybierz kolor:
-                <ChooseColor />
+                <ChooseColor callback={color => {
+                    props.createGame({mode: 'singleGame', color})
+                    props.back();
+                    props.closeDialog();
+                }}/>
             </div>
         );
     }
@@ -43,10 +47,10 @@ const MenuList = (props) => {
     return (
         <div className="MenuList">
             <div className="MenuList-header">Nowa gra</div>
-            <div className="MenuList-button" >Gra z komputerem</div>
+            <div className="MenuList-button" onClick={singleGame}>Gra z komputerem</div>
             <div className="MenuList-button" onClick={onlineGame}>Gra online</div>
             <div className="MenuList-button" onClick={twoPlayers}>Dwoje graczy</div>
-            <div className="MenuList-header" />
+            <div className="MenuList-header"/>
             <div className="MenuList-button MenuList-button-settings">Analiza partii</div>
             <div className="MenuList-button MenuList-button-settings">Importuj / Eksportuj</div>
             <div className="MenuList-button MenuList-button-settings">Ustawienia</div>
