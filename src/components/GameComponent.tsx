@@ -1,26 +1,15 @@
 import React from 'react';
 import { Subject } from 'rxjs';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
-import { WebChessboard } from './webChessboard';
-import {SocketPlayer} from "../common/core/socket-player";
-import {bindActionCreators} from "redux";
-import {openDialog, closeDialog, gameCreated} from "../actions";
-
-class ChessPlayer implements Player {
-  color: 'white' | 'black';
-  emitMove: Subject<string> = new Subject<string>();
-
-  move(move: string) {
-    this.emitMove.next(move);
-  }
-
-  receiveMove(move: string) {
-    console.log(this.color + ' player received: ' + move);
-  }
-}
+import { SocketPlayer } from "../common/core/socket-player";
+import { bindActionCreators } from "redux";
+import { openDialog, closeDialog, gameCreated } from "../actions";
+import { StockfishPlayer } from '../common/core/stockfish-player';
+import { ChessPlayer } from '../common/core/chess-player';
+import WebChessboard from './WebChessboard';
 
 interface State {
   whitePlayer: ChessPlayer;
@@ -79,6 +68,10 @@ class GameComponent extends React.Component<Props, State> {
       this.color = 'white'
       this.init(new ChessPlayer());
     }
+    else if (this.mode === 'singleGame') {
+      this.color = this.props.config.color;
+      this.init(new StockfishPlayer(15));
+    }
   }
 
   newOnlineGame(color) {
@@ -130,6 +123,14 @@ class GameComponent extends React.Component<Props, State> {
       bp = me;
     }
     game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp});
+    if (this.mode === 'singleGame') {
+      // @ts-ignore
+      opponent.setBoardInfo(game.getBoardInfo());
+      if (this.color === 'black') {
+        // @ts-ignore
+        opponent.makeFirstMove();
+      }
+    }
 
     this.setState({
       currentPlayer: me,

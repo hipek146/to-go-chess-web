@@ -1,12 +1,15 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Subject } from 'rxjs';
 import { useEffect, useState, FunctionComponent } from 'react';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move';
-import { getComponent } from '../helpers/get-component';
-import './webChessboard.css';
+import { getComponent, getComponentBySymbol } from '../helpers/get-component';
+import { bindActionCreators } from "redux";
+import { openDialog, closeDialog } from "../actions";
+import './WebChessboard.css';
 
 
 interface Props {
@@ -15,8 +18,9 @@ interface Props {
     size: number;
     turn: 'white' | 'black';
     clearBoard: Subject<void>;
+    openDialog: any; 
+    closeDialog: any;
 }
-
 
 interface LastMove {
     previousPosition: {
@@ -26,15 +30,10 @@ interface LastMove {
     move: Move
 }
 
-
 interface FirstPress {
     piece: Piece;
     possibleMoves: Move[];
 }
-
-
-const getMinWindowSize = () => Math.min(window.innerHeight, window.innerWidth);
-
 
 const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined)  => {
     let items: any[] = [];
@@ -67,8 +66,26 @@ const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: 
     return items;
 };
 
+const generatePromotionItems = (color: 'white' | 'black', callback: (symbol: string) => void) => {
+    let symbols = color === 'black' ? ['q', 'r', 'b', 'n'] : ['Q', 'R', 'B', 'N'];
+    let items: any[] = [];
 
-export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
+    symbols.forEach(symbol => {
+        items.push(
+            <div 
+                key={`promotion=${symbol}`} 
+                onClick={() => callback(symbol.toUpperCase())}
+                className='promotionPiece'
+            >
+                { getComponentBySymbol(symbol) }
+            </div>
+        );
+    });
+
+    return items;
+};
+
+const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
@@ -93,7 +110,7 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     const onPress = (piece: Piece, row: number, column: number) => {
         if (piece === firstPress?.piece) {
             setFirstPress(undefined);
-        } else if (piece !== undefined && props.turn == piece.color && boardInfo.turn === piece.color) {
+        } else if (piece !== undefined && boardInfo.turn === piece.color) {
             setFirstPress({
                 piece, 
                 possibleMoves: piece.possibleMoves(boardInfo)
@@ -105,15 +122,33 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
             if (firstPress.piece.symbol === 'p') {
                 if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
                 movePGN += 'abcdefgh'[column - 1] + row;
-                if (row === 8 && boardInfo.turn === 'white') movePGN += '=Q';
-                if (row === 1 && boardInfo.turn === 'black') movePGN += '=Q';
+                if ((row === 8 && boardInfo.turn === 'white') || (row === 1 && boardInfo.turn === 'black')) {
+                    const callback = (symbol:string) => {
+                        movePGN += `=${symbol}`;
+                        props.onMove(movePGN);
+                        setFirstPress(undefined);
+                        setLastMove({
+                            previousPosition: {
+                                row: firstPress.piece.row, 
+                                column: firstPress.piece.column
+                            }, 
+                            move
+                        });
+                        props.closeDialog()
+                    };
+
+                    props.openDialog(
+                        <div className='promotionContainer'>
+                            {generatePromotionItems(boardInfo.turn, callback)}
+                        </div>
+                    )
+                }
             } else if (firstPress.piece.symbol === 'k' && move.type === 'kingsideCastle') {
                 movePGN += 'O-O';
             } else if (firstPress.piece.symbol === 'k' && move.type === 'queensideCastle') {
                 movePGN += 'O-O-O';
             } else {
                 movePGN += firstPress.piece.symbol.toUpperCase();
-                if (move.type === 'capture') movePGN += 'x';
                 let samePieces = boardInfo.find(firstPress.piece.symbol, boardInfo.turn).filter(piece => {
                     return piece.checkMove(boardInfo, row, column, move.type);
                 });
@@ -128,9 +163,11 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
                 if (toAdd.length === 0 && samePieces.length !== 0) {
                     toAdd += 'abcdefgh'[firstPress.piece.column - 1];
                 }
+                if (move.type === 'capture') toAdd += 'x';
                 movePGN += toAdd;
                 movePGN += 'abcdefgh'[column - 1] + row;
             } 
+            console.log(movePGN)
             props.onMove(movePGN)
             setFirstPress(undefined);
             setLastMove({
@@ -155,3 +192,23 @@ export const WebChessboard: FunctionComponent<Props> = (props: Props) => {
         </div>
     );
 };
+
+const mapDispatchToProps = (dispatch: any) => ({
+    ...bindActionCreators(
+        {
+          openDialog,
+          closeDialog,
+        },
+        dispatch,
+    ),
+});
+
+const mapStateToProps = (state: any) => ({});
+
+const WrappedWebChessboard = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(WebChessboard);
+
+export default WrappedWebChessboard;
+

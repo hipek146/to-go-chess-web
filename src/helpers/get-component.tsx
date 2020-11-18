@@ -46,3 +46,34 @@ export const getComponent = (piece: Piece) => {
             return null;
     }
 }
+
+export const getComponentBySymbol = (symbol: string) => {
+    switch (symbol) {
+        case 'P':
+            return <WhitePawn/>;
+        case 'R':
+            return <WhiteRook/>;
+        case 'N':
+            return <WhiteKnight/>;
+        case 'B':
+            return <WhiteBishop/>;
+        case 'Q':
+            return <WhiteQueen/>;
+        case 'K':
+            return <WhiteKing/>;
+        case 'p':
+            return <BlackPawn/>;
+        case 'r':
+            return <BlackRook/>;
+        case 'n':
+            return <BlackKnight/>;
+        case 'b':
+            return <BlackBishop/>;
+        case 'q':
+            return <BlackQueen/>;
+        case 'k':
+            return <BlackKing/>;
+        default:
+            return null;
+    }
+}

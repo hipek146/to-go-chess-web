@@ -206,7 +206,7 @@ export class Game {
 		move = move.slice(0, offset);
 
 		let pieces = this.boardInfo.find(symbol, this.boardInfo.turn).filter(piece => {
-				return piece.checkMove(this.boardInfo, destinationRow, destinationColumn, type);
+			return piece.checkMove(this.boardInfo, destinationRow, destinationColumn, type);
 		});
 		pieces = pieces.filter(piece =>{
 			if(specifiedRow && specifiedColumn) return piece.row === specifiedRow && piece.column === specifiedColumn;
@@ -229,8 +229,8 @@ export class Game {
 		this.boardInfo.moved(piece, oldRow, oldColumn);
 		if (symbol === 'p' && type === 'capture'
 			&& destinationColumn === this.boardInfo.enPassant.column && destinationRow === this.boardInfo.enPassant.row ) {
-				this.boardInfo.capture(piece.color === 'white' ? 5 : 4, destinationColumn)
-			}
+			this.boardInfo.capture(piece.color === 'white' ? 5 : 4, destinationColumn)
+		}
 
 		this.boardInfo.enPassant = {
 			row: undefined,
@@ -323,5 +323,9 @@ export class Game {
 		else {
 			this.boardInfo.castlingAvailability.black = {kingside: false, queenside: false};
 		}
+	}
+
+	getBoardInfo() {
+		return this.boardInfo;
 	}
 }

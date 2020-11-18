@@ -49,3 +49,15 @@ img {
     width: 100%;
     height: 100%;
 }
+
+.promotionContainer {
+    max-width: 400px;
+    max-height: 200px;
+    display: flex;
+    flex-direction: row;
+}
+
+.promotionPiece {
+    width: 25%;
+    height: 100%;
+}
