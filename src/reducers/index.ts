@@ -8,6 +8,11 @@ const initialApp = {
 
 const app = (state = initialApp, action: any) => {
     switch (action.type) {
+        case 'GAME_TREE_UPDATED':
+            return {
+                ...state,
+                gameTree: action.gameTree
+            }
         case 'RESTORE_USER':
             return {
                 ...state,

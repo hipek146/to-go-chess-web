@@ -167,7 +167,6 @@ const WebChessboard: FunctionComponent<Props> = (props: Props) => {
                 movePGN += toAdd;
                 movePGN += 'abcdefgh'[column - 1] + row;
             } 
-            console.log(movePGN)
             props.onMove(movePGN)
             setFirstPress(undefined);
             setLastMove({

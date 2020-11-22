@@ -10,7 +10,6 @@ export class SocketPlayer implements Player {
         this.webSocket = ws;
         ws.onmessage = (event) => {
             let msg = JSON.parse(String(event.data));
-            console.log(msg);
             if (msg.type === 'receive') {
                 this.move(msg.move);
             }

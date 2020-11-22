@@ -6,10 +6,25 @@ import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { SocketPlayer } from "../common/core/socket-player";
 import { bindActionCreators } from "redux";
-import { openDialog, closeDialog, gameCreated } from "../actions";
+import { openDialog, closeDialog, gameCreated, gameTreeUpdated } from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
+import GameTree from '../common/game_tree/game-tree';
 import WebChessboard from './WebChessboard';
+import ChessClockConfig from '../common/timer/chess-clock-config';
+
+const config: ChessClockConfig = {
+  initMsBlack: 360 * 1000,
+  initMsWhite: 360 * 1000,
+  stepBlack: 1,
+  stepWhite: 1,
+  mode: {
+    type: 'standard',
+  },
+  endCallback: (winner: string) => {
+    console.log(winner + 'wins');
+  }
+}
 
 interface State {
   whitePlayer: ChessPlayer;
@@ -17,9 +32,10 @@ interface State {
   chessboard: Chessboard;
   currentPlayer: ChessPlayer;
   size: number;
+  gameTree: GameTree;
 }
 
-interface Props {size: number, config, newGame, openDialog, closeDialog, gameCreated}
+interface Props {size: number, config, newGame, openDialog, closeDialog, gameCreated, gameTreeUpdated}
 
 class GameComponent extends React.Component<Props, State> {
   divElement: HTMLDivElement;
@@ -39,6 +55,7 @@ class GameComponent extends React.Component<Props, State> {
       chessboard: chessboard,
       currentPlayer: null,
       size: props.size,
+      gameTree: null,
     }
   }
 
@@ -122,7 +139,7 @@ class GameComponent extends React.Component<Props, State> {
       wp = opponent;
       bp = me;
     }
-    game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp});
+    game.init({canvas: this.state.chessboard, whitePlayer: wp, chessClockConfig: config, blackPlayer: bp});
     if (this.mode === 'singleGame') {
       // @ts-ignore
       opponent.setBoardInfo(game.getBoardInfo());
@@ -136,6 +153,7 @@ class GameComponent extends React.Component<Props, State> {
       currentPlayer: me,
       whitePlayer: wp,
       blackPlayer: bp,
+      gameTree: game.gameTree
     });
   }
 
@@ -162,6 +180,7 @@ class GameComponent extends React.Component<Props, State> {
       chessboard,
       whitePlayer,
       blackPlayer,
+      gameTree
     } = this.state;
 
     const onMove = (move: string) => {
@@ -176,6 +195,7 @@ class GameComponent extends React.Component<Props, State> {
           this.setState({currentPlayer: whitePlayer});
         }
       }
+      this.props.gameTreeUpdated(gameTree.toSerializable())
     };
 
     return (
@@ -208,6 +228,7 @@ const mapDispatchToProps = (dispatch: any) => ({
         openDialog,
         closeDialog,
         gameCreated,
+        gameTreeUpdated
       },
       dispatch,
   ),
