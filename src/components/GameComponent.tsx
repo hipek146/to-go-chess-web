@@ -9,7 +9,6 @@ import { bindActionCreators } from "redux";
 import { openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated } from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
-import GameTree from '../common/game_tree/game-tree';
 import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 
