@@ -7,4 +7,26 @@
     box-sizing: border-box;
     flex-grow: 1;
     margin: 15px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.TreeNode {
+    font-size: 18px;
+    padding: 5px;
+    height: 30px;
+    width: 60.8px;
+    cursor: pointer;
+    text-align: center;
+    background-color: #555555aa;
+    border: 1px solid #666666;
+    color: #404040;
+    user-select: none;
+}
+
+.TreeNode:hover {
+    background-color: #666666;
+    color: #909090;
 }

@@ -53,10 +53,7 @@ class GameTree {
             }
         }
         if (node.move !== undefined) {
-            result.push({
-                move: node.move,
-                positionFEN: node.positionFEN
-            });
+            result.push(node);
         }
         if (branchResult.length !== 0) {
             result.push(branchResult);

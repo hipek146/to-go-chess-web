@@ -9,16 +9,16 @@ import ChessClockConfig from '../timer/chess-clock-config';
 export class Game {
 	
 	event: Subject<any> = new Subject<any>();
-	gameTree: GameTree;
 	
-	private whitePlayer: Player;
-	private blackPlayer: Player;
+	whitePlayer: Player;
+	blackPlayer: Player;
 	
+	private gameTree: GameTree;
 	private canvas: Canvas;
 	
 	private positionFEN: string;
-	
 	private boardInfo: BoardInfo;
+
 	private chessClock: ChessClock;
 
 	private whiteSubscription: Subscription;
@@ -337,8 +337,10 @@ export class Game {
 		}
 	}
 
-	getBoardInfo() {
-		return this.boardInfo;
+	update(positionFEN: string) {
+		this.positionFEN = positionFEN;
+		this.boardInfo.fromFEN(positionFEN);
+		this.canvas.draw(positionFEN);
 	}
 
 	getTimes() {
@@ -347,5 +349,13 @@ export class Game {
 
 	stopClock() {
 		this.chessClock.stopCountdown();
+	}
+
+	getTurn() {
+		return this.boardInfo.turn;
+	}
+	
+	getTree() {
+		return this.gameTree;
 	}
 }
