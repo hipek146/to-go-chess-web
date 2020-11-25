@@ -14,6 +14,11 @@ class GameTree {
             this.root = node;
             this.leaf = node;
         } else {
+            const sameFENNode = this.leaf.getChildren().filter(el => el.positionFEN === positionFEN);
+            if (sameFENNode.length !== 0) {
+                this.leaf = sameFENNode[0];
+                return sameFENNode[0];
+            }
             node.addParent(this.leaf);
             this.leaf.addChild(node);
             this.leaf = node;
