@@ -95,6 +95,8 @@ const WebChessboard: FunctionComponent<Props> = (props: Props) => {
 
     useEffect(() => {
         props.chessboard.callback = (newPosition) => {
+            setFirstPress(undefined);
+            setLastMove(undefined);
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };

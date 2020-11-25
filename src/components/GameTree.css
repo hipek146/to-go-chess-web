@@ -12,31 +12,30 @@
     flex-wrap: wrap;
     align-content: flex-start;
     overflow-y: auto;
+    box-shadow: inset 0 0 2px #000;
 }
 
 .Leaf {
     font-size: 18px;
     padding: 5px;
-    height: 30px;
-    width: calc(45%  - 11px);
+    height: 27px;
+    line-height: 27px;
+    width: calc(44%  - 11px);
     cursor: pointer;
     text-align: center;
     border-right: 1px solid #666666;
-    color: #990000;
+    color: #784444;
+    background-color: #77555544;
     user-select: none;
     font-weight: bold;
-}
-
-.SubTree .Leaf {
-    font-size: 15px;
-    height: 22px;
 }
 
 .TreeNode {
     font-size: 18px;
     padding: 5px;
-    height: 30px;
-    width: calc(45%  - 11px);
+    height: 27px;
+    line-height: 27px;
+    width: calc(44%  - 11px);
     cursor: pointer;
     text-align: center;
     border-right: 1px solid #666666;
@@ -45,15 +44,15 @@
 }
 
 .TreeNode:hover {
-    background-color: #666666;
-    color: #909090;
+    background-color: #808080;
+    color: #f0f0f0;
 }
 
 .TurnNumber {
     border-right: 1px solid #666666;
-    width: calc(10% - 11px);
-    height: 30px;
-    line-height: 30px;
+    width: calc(12% - 11px);
+    height: 27px;
+    line-height: 27px;
     padding: 5px;
     text-align: center;
     color: #505050;
@@ -64,8 +63,9 @@
 .EmptyNode {
     font-size: 16px;
     padding: 5px;
-    height: 25px;
-    width: calc(45%  - 11px);
+    height: 27px;
+    line-height: 27px;
+    width: calc(44%  - 11px);
     text-align: center;
     border-right: 1px solid #666666;
     color: #404040;
@@ -79,21 +79,34 @@
     flex-wrap: wrap;
     align-content: flex-start;
     background-color: #69696933;
+    box-shadow: inset 0 0 3px #000;
+}
+
+.SubTree .Leaf {
+    font-size: 15px;
+    height: 22px;
+    line-height: 22px;
+    width: calc(45.5%  - 11px);
 }
 
 .SubTree .TurnNumber {
+    width: calc(9% - 11px);
     height: 22px;
     line-height: 22px;
-    font-size: 15px;
+    font-size: 12px;
 }
 
 .SubTree .TreeNode {
+    width: calc(45.5%  - 11px);
     font-size: 15px;
+    line-height: 22px;
     height: 22px;
 }
 
 .SubTree .EmptyNode {
+    width: calc(45.5%  - 11px);
     font-size: 15px;
     height: 22px;
+    line-height: 22px;
     text-align: center;
 }

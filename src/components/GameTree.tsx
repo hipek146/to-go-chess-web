@@ -27,9 +27,11 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
                 branchResult.push(
                     [
                         <div key={"turn"+node[0].positionFEN} className="TurnNumber">
-                            {node[0].positionFEN.slice(-1) - 1}...
+                            {node[0].positionFEN.split(' ').slice(-1) - 1}..
                          </div>,
-                        <div key={node[0].positionFEN} className="EmptyNode"/>
+                        <div key={node[0].positionFEN} className="EmptyNode">
+                            ...
+                        </div>
                     ]
                 );
             }
@@ -52,7 +54,7 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
                 result.push(
                     [
                         <div key={"turn"+node[0].positionFEN} className="TurnNumber">
-                            {node[0].positionFEN.slice(-1) - 1}
+                            {node[0].positionFEN.split(' ').slice(-1) - 1}
                         </div>,
                         <div key={node[0].positionFEN} className="EmptyNode">
                             ...
@@ -64,7 +66,7 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
             if (node.positionFEN.split(' ')[1] === 'b') {
                 result.push(
                     <div key={"turn"+node.positionFEN} className="TurnNumber">
-                        {node.positionFEN.slice(-1)}
+                        {node.positionFEN.split(' ').slice(-1)}
                     </div>
                 );
             }
