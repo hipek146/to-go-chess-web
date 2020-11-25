@@ -6,10 +6,9 @@ import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { SocketPlayer } from "../common/core/socket-player";
 import { bindActionCreators } from "redux";
-import { openDialog, closeDialog, gameCreated, gameTreeUpdated } from "../actions";
+import { openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated } from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
-import GameTree from '../common/game_tree/game-tree';
 import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 
@@ -27,15 +26,13 @@ const config: ChessClockConfig = {
 }
 
 interface State {
-  whitePlayer: ChessPlayer;
-  blackPlayer: ChessPlayer;
   chessboard: Chessboard;
   currentPlayer: ChessPlayer;
   size: number;
-  gameTree: GameTree;
+  game: Game;
 }
 
-interface Props {size: number, config, newGame, openDialog, closeDialog, gameCreated, gameTreeUpdated}
+interface Props {size: number, config, newGame, openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated}
 
 class GameComponent extends React.Component<Props, State> {
   divElement: HTMLDivElement;
@@ -50,12 +47,10 @@ class GameComponent extends React.Component<Props, State> {
     let chessboard = new Chessboard();
 
     this.state = {
-      whitePlayer: null,
-      blackPlayer: null,
       chessboard: chessboard,
       currentPlayer: null,
       size: props.size,
-      gameTree: null,
+      game: null
     }
   }
 
@@ -100,7 +95,7 @@ class GameComponent extends React.Component<Props, State> {
           this.ws.close();
         }
     )
-    this.ws = new WebSocket('ws://localhost:9000')
+    this.ws = new WebSocket('wss://to-go-chess-sockets.herokuapp.com')
     this.ws.onerror = (event) => {
       this.props.openDialog(
           <div>
@@ -149,11 +144,11 @@ class GameComponent extends React.Component<Props, State> {
       }
     }
 
+    this.props.gameObjectCreated(game);
+
     this.setState({
       currentPlayer: me,
-      whitePlayer: wp,
-      blackPlayer: bp,
-      gameTree: game.gameTree
+      game
     });
   }
 
@@ -176,37 +171,40 @@ class GameComponent extends React.Component<Props, State> {
 
   render() {
     const {
-      currentPlayer,
       chessboard,
-      whitePlayer,
-      blackPlayer,
-      gameTree
+      currentPlayer,
+      game
     } = this.state;
 
     const onMove = (move: string) => {
-      currentPlayer.move(move);
-      if (this.mode === 'twoPlayers') {
-        if (currentPlayer === whitePlayer) {
-          this.color = 'black';
-          this.setState({currentPlayer: blackPlayer});
-        }
-        if (currentPlayer === blackPlayer) {
-          this.color = 'white';
-          this.setState({currentPlayer: whitePlayer});
-        }
+      if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
+        currentPlayer.move(move);
       }
-      this.props.gameTreeUpdated(gameTree.toSerializable())
+      else {
+        if (game.getTurn() === 'white') {
+          game.whitePlayer.move(move);
+          this.color = 'black';
+        } else {
+          game.blackPlayer.move(move);
+          this.color = 'white';
+        }
+        this.props.gameTreeUpdated(game.getTree().toSerializable());
+      }
     };
 
     return (
         <div style={styles}>
-          <WebChessboard
+          { game ? 
+            <WebChessboard
               onMove={onMove}
               chessboard={chessboard}
               turn={this.color}
+              mode={this.mode}
               clearBoard={this.clearBoard}
               size={this.state.size}
-          />
+            /> 
+            : undefined
+          }
         </div>
     );
   }
@@ -228,7 +226,8 @@ const mapDispatchToProps = (dispatch: any) => ({
         openDialog,
         closeDialog,
         gameCreated,
-        gameTreeUpdated
+        gameTreeUpdated,
+        gameObjectCreated
       },
       dispatch,
   ),

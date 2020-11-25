@@ -5,7 +5,6 @@ export class Chessboard implements Canvas {
     callback = (newPosition: string) => {};
 
     draw(newPosition: string) {
-        console.log(`drawing ${newPosition}`)
         this.positionFEN = newPosition;
         this.callback(newPosition);
     }

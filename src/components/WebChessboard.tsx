@@ -20,6 +20,7 @@ interface Props {
     clearBoard: Subject<void>;
     openDialog: any; 
     closeDialog: any;
+    mode: 'onlineGame' | 'singleGame' | 'twoPlayers';
 }
 
 interface LastMove {
@@ -94,6 +95,8 @@ const WebChessboard: FunctionComponent<Props> = (props: Props) => {
 
     useEffect(() => {
         props.chessboard.callback = (newPosition) => {
+            setFirstPress(undefined);
+            setLastMove(undefined);
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };
@@ -108,6 +111,9 @@ const WebChessboard: FunctionComponent<Props> = (props: Props) => {
     }, []);
     
     const onPress = (piece: Piece, row: number, column: number) => {
+        if ((props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
+            return;
+        }
         if (piece === firstPress?.piece) {
             setFirstPress(undefined);
         } else if (piece !== undefined && boardInfo.turn === piece.color) {

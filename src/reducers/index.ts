@@ -13,6 +13,11 @@ const app = (state = initialApp, action: any) => {
                 ...state,
                 gameTree: action.gameTree
             }
+        case 'GAME_OBJECT_CREATED':
+            return {
+                ...state,
+                game: action.game
+            }
         case 'RESTORE_USER':
             return {
                 ...state,

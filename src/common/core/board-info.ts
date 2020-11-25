@@ -27,6 +27,10 @@ export class BoardInfo {
     turn: 'white' | 'black';
 
     constructor() {
+        this.init();
+    }
+
+    init(): void {
         for (let row = 0; row < 8; row++) {
             this.board[row] = new Array(8);
         }
@@ -130,6 +134,7 @@ export class BoardInfo {
     }
 
     fromFEN(positionFEN: string) {
+        this.init();
         let column = 1;
         let row = 8;
         let i: number;

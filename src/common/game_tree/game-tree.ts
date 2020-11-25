@@ -46,20 +46,17 @@ class GameTree {
 
     traverse = (node: TreeNode, result = []) => {
         if (node === undefined) return;
-        let branchResult = [];
+        if (node.move !== undefined) {
+            result.push(node);
+        }
         for(const child of node.getChildren()) {
+            let branchResult = [];
             if (child !== node.getMainChild()) {
                 this.traverse(child, branchResult);
             }
-        }
-        if (node.move !== undefined) {
-            result.push({
-                move: node.move,
-                positionFEN: node.positionFEN
-            });
-        }
-        if (branchResult.length !== 0) {
-            result.push(branchResult);
+            if (branchResult.length !== 0) {
+                result.push(branchResult);
+            }
         }
         this.traverse(node.getMainChild(), result);
     }
