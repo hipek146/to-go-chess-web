@@ -11,10 +11,11 @@ import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
 import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
+import GameInfo from './GameInfo';
 
-const config: ChessClockConfig = {
-  initMsBlack: 360 * 1000,
-  initMsWhite: 360 * 1000,
+const clockConfig: ChessClockConfig = {
+  initMsBlack: 300 * 1000,
+  initMsWhite: 300 * 1000,
   stepBlack: 1,
   stepWhite: 1,
   mode: {
@@ -56,7 +57,7 @@ class GameComponent extends React.Component<Props, State> {
 
   componentDidMount() {
     this.mode = 'twoPlayers';
-    this.newGame();
+    this.newGame(undefined, 'standard');
   }
 
   componentDidUpdate() {
@@ -71,22 +72,22 @@ class GameComponent extends React.Component<Props, State> {
     this.setState({size: nextProps.size})
   }
 
-  newGame(newColor?) {
+  newGame(newColor?: string, newClockType?: string) {
     this.clearBoard.next();
     if (this.mode === 'onlineGame') {
-      this.newOnlineGame(newColor || this.props.config.color);
+      this.newOnlineGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
     }
     else if (this.mode === 'twoPlayers') {
       this.color = 'white'
-      this.init(new ChessPlayer());
+      this.init(new ChessPlayer(),  newClockType || this.props.config.clockType);
     }
     else if (this.mode === 'singleGame') {
       this.color = this.props.config.color;
-      this.init(new StockfishPlayer(15));
+      this.init(new StockfishPlayer(15),  newClockType || this.props.config.clockType);
     }
   }
 
-  newOnlineGame(color) {
+  newOnlineGame(color, clockType) {
     this.props.openDialog(
         <div>
           Oczekiwanie na przeciwnika...
@@ -111,12 +112,12 @@ class GameComponent extends React.Component<Props, State> {
       if (msg.type === 'config') {
         this.props.closeDialog();
         this.color = msg.color;
-        this.init(new SocketPlayer(this.ws));
+        this.init(new SocketPlayer(this.ws), clockType);
       }
     };
   }
 
-  init(opponent: Player) {
+  init(opponent: Player, clockType: string) {
     let game = new Game();
     game.event.subscribe((event) => {
       if (event.type === 'mate') {
@@ -134,7 +135,14 @@ class GameComponent extends React.Component<Props, State> {
       wp = opponent;
       bp = me;
     }
-    game.init({canvas: this.state.chessboard, whitePlayer: wp, chessClockConfig: config, blackPlayer: bp});
+    clockConfig.endCallback = (winner: string) => {
+      this.onEndGame(winner);
+    };
+    clockConfig.mode = {
+      type: clockType,
+      toAdd: 5000
+    }
+    game.init({canvas: this.state.chessboard, whitePlayer: wp, chessClockConfig: clockConfig, blackPlayer: bp});
     if (this.mode === 'singleGame') {
       // @ts-ignore
       opponent.setBoardInfo(game.getBoardInfo());
@@ -195,14 +203,17 @@ class GameComponent extends React.Component<Props, State> {
     return (
         <div style={styles}>
           { game ? 
-            <WebChessboard
-              onMove={onMove}
-              chessboard={chessboard}
-              turn={this.color}
-              mode={this.mode}
-              clearBoard={this.clearBoard}
-              size={this.state.size}
-            /> 
+            <>
+              <GameInfo/>
+              <WebChessboard
+                onMove={onMove}
+                chessboard={chessboard}
+                turn={this.color}
+                mode={this.mode}
+                clearBoard={this.clearBoard}
+                size={this.state.size}
+              /> 
+            </>
             : undefined
           }
         </div>

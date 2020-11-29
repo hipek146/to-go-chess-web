@@ -347,6 +347,10 @@ export class Game {
 		return this.chessClock.getTimes();
 	}
 
+	getBoardInfo() {
+		return this.boardInfo;
+	}
+
 	stopClock() {
 		this.chessClock.stopCountdown();
 	}

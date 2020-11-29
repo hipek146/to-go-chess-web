@@ -7,42 +7,55 @@ import {connect} from 'react-redux';
 const ChooseColor = (props) => {
     return (
         <div>
-            <button onClick={() => props.callback('white')}>Białe</button>
-            <button onClick={() => props.callback('random')}>Losowo</button>
-            <button onClick={() => props.callback('black')}>Czarne</button>
+            Wybierz kolor:
+            <div>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'white'}))}>Białe</button>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'random'}))}>Losowo</button>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'black'}))}>Czarne</button>
+            </div>
         </div>
     );
 }
 
+const ChooseClockType = (props) => {
+    return (
+        <div>
+            Wybierz tryb czasowy:
+            <div>
+                <button onClick={() => props.callback(props.color, 'standard')}>Standard</button>
+                <button onClick={() => props.callback(props.color, 'fischer')}>Fischer</button>
+            </div>
+        </div>
+    );
+}
 
 const MenuList = (props) => {
     const singleGame = () => {
         props.openDialog(
-            <div>
-                Wybierz kolor:
-                <ChooseColor callback={color => {
-                    props.createGame({mode: 'singleGame', color})
-                    props.back();
-                    props.closeDialog();
-                }}/>
-            </div>
+            <ChooseColor openDialog={props.openDialog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'singleGame', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
         );
     }
     const onlineGame = () => {
         props.openDialog(
-            <div>
-                Wybierz kolor:
-                <ChooseColor callback={color => {
-                    props.createGame({mode: 'onlineGame', color})
-                    props.back();
-                    props.closeDialog();
-                }}/>
-            </div>
+            <ChooseColor openDialog={props.openDialog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'onlineGame', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
         );
     }
     const twoPlayers = () => {
-        props.createGame({mode: 'twoPlayers'});
-        props.back();
+        props.openDialog(
+            <ChooseClockType color='white' openDialog={props.openDiaog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'twoPlayers', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
+        );
     }
     return (
         <div className="MenuList">

@@ -17,7 +17,7 @@ class Timer {
     }
 
     start = () => {
-        if (this.mode.type === 'fisher') {
+        if (this.mode.type === 'fischer') {
             this.ms += this.mode.toAdd;
         }
 
