@@ -71,6 +71,27 @@ class GameTree {
         this.traverse(this.root, result);
         return result;
     }
+
+    toPGN = () => {
+        let moves = [];
+        for(let node = this.root; node !== undefined; node = node.getMainChild()) {
+            if (node.move === undefined)
+                continue;
+            moves.push(node.move);
+        } 
+        let results = '', tag = 1, isTagged = false;
+        moves.forEach(move => {
+            if (!isTagged) {
+                results += `${tag}. ${move}`;
+                isTagged = true;
+                tag++;
+            } else {
+                results += ` ${move} `;
+                isTagged = false;
+            }
+        })
+        return results;
+    }
 }
 
 export default GameTree;

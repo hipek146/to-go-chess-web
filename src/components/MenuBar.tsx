@@ -10,7 +10,7 @@ import { ReactComponent as Swap } from "../images/cached-24px.svg"
 import { ReactComponent as Emote } from "../images/tag_faces-24px.svg"
 
 
-interface Props {press, game, gameTreeUpdated}
+interface Props {press, game, gameTreeUpdated, isTreeEnabled}
 
 const MenuBar = (props: Props) => {
     const onPreviousMovePress = () => {
@@ -40,14 +40,14 @@ const MenuBar = (props: Props) => {
                     fill={'#efe788'}
                 />
             </div>
-            <div onClick={() => onPreviousMovePress()} className="MenuBar-button">
+            <div onClick={props.isTreeEnabled ? () => onPreviousMovePress() : undefined} className="MenuBar-button">
                 <Before
                     height="100%"
                     style={{transform: 'scale(1.4)'}}
                     fill={'#efe788'}
                 />
             </div>
-            <div onClick={() => onNextMovePress()} className="MenuBar-button">
+            <div onClick={props.isTreeEnabled ? () => onNextMovePress() : undefined} className="MenuBar-button">
                 <Next
                     height="100%"
                     style={{transform: 'scale(1.4)'}}
@@ -81,10 +81,11 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {game, gameTreeUpdated} = state.app;
+    const {game, gameTreeUpdated, isTreeEnabled} = state.app;
     return {
       game,
-      gameTreeUpdated
+      gameTreeUpdated,
+      isTreeEnabled
     };
 };
   

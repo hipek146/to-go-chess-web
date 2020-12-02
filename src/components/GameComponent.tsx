@@ -6,12 +6,13 @@ import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { SocketPlayer } from "../common/core/socket-player";
 import { bindActionCreators } from "redux";
-import { openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated } from "../actions";
+import { openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated, disableTreeMovement } from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
 import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameInfo from './GameInfo';
+import ChessClock from '../common/timer/chess-clock';
 
 const clockConfig: ChessClockConfig = {
   initMsBlack: 300 * 1000,
@@ -27,13 +28,24 @@ const clockConfig: ChessClockConfig = {
 }
 
 interface State {
-  chessboard: Chessboard;
-  currentPlayer: ChessPlayer;
+  currentPlayer: Player;
   size: number;
   game: Game;
 }
 
-interface Props {size: number, config, newGame, openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated}
+interface Props {
+  size: number, 
+  // store
+  config, 
+  newGame,
+  // actions 
+  openDialog, 
+  closeDialog, 
+  gameCreated, 
+  gameTreeUpdated, 
+  gameObjectCreated, 
+  disableTreeMovement
+}
 
 class GameComponent extends React.Component<Props, State> {
   divElement: HTMLDivElement;
@@ -45,13 +57,10 @@ class GameComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    let chessboard = new Chessboard();
-
     this.state = {
-      chessboard: chessboard,
-      currentPlayer: null,
+      currentPlayer: undefined,
       size: props.size,
-      game: null
+      game: undefined
     }
   }
 
@@ -118,6 +127,7 @@ class GameComponent extends React.Component<Props, State> {
   }
 
   init(opponent: Player, clockType: string) {
+    let chessboard = new Chessboard();
     let game = new Game();
     game.event.subscribe((event) => {
       if (event.type === 'mate') {
@@ -142,7 +152,8 @@ class GameComponent extends React.Component<Props, State> {
       type: clockType,
       toAdd: 5000
     }
-    game.init({canvas: this.state.chessboard, whitePlayer: wp, chessClockConfig: clockConfig, blackPlayer: bp});
+    let chessClock = new ChessClock(clockConfig);
+    game.init({canvas: chessboard, whitePlayer: wp, chessClock, blackPlayer: bp});
     if (this.mode === 'singleGame') {
       // @ts-ignore
       opponent.setBoardInfo(game.getBoardInfo());
@@ -153,7 +164,8 @@ class GameComponent extends React.Component<Props, State> {
     }
 
     this.props.gameObjectCreated(game);
-
+    this.props.disableTreeMovement();
+    this.props.gameTreeUpdated(game.getTree().toSerializable());
     this.setState({
       currentPlayer: me,
       game
@@ -179,7 +191,6 @@ class GameComponent extends React.Component<Props, State> {
 
   render() {
     const {
-      chessboard,
       currentPlayer,
       game
     } = this.state;
@@ -189,15 +200,15 @@ class GameComponent extends React.Component<Props, State> {
         currentPlayer.move(move);
       }
       else {
-        if (game.getTurn() === 'white') {
-          game.whitePlayer.move(move);
-          this.color = 'black';
-        } else {
-          game.blackPlayer.move(move);
-          this.color = 'white';
-        }
-        this.props.gameTreeUpdated(game.getTree().toSerializable());
+          if (game.getTurn() === 'white') {
+              game.whitePlayer.move(move);
+              this.color = 'black';
+          } else {
+              game.blackPlayer.move(move);
+              this.color = 'white';
+          }
       }
+    this.props.gameTreeUpdated(game.getTree().toSerializable());
     };
 
     return (
@@ -207,10 +218,9 @@ class GameComponent extends React.Component<Props, State> {
               <GameInfo/>
               <WebChessboard
                 onMove={onMove}
-                chessboard={chessboard}
+                chessboard={game.getChessboard()}
                 turn={this.color}
                 mode={this.mode}
-                clearBoard={this.clearBoard}
                 size={this.state.size}
               /> 
             </>
@@ -238,7 +248,8 @@ const mapDispatchToProps = (dispatch: any) => ({
         closeDialog,
         gameCreated,
         gameTreeUpdated,
-        gameObjectCreated
+        gameObjectCreated,
+        disableTreeMovement
       },
       dispatch,
   ),

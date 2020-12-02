@@ -7,10 +7,11 @@ import './GameTree.css';
 interface Props {
     gameTree: any,
     game,
-    gameTreeUpdated
+    gameTreeUpdated,
+    isTreeEnabled
 }
 
-const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
+const generateItems = (game, gameTree: any, gameTreeUpdated: any, isTreeEnabled: boolean) => {
     let items: any[] = [];
     
     const onClick = (node) => {
@@ -71,7 +72,11 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
                 );
             }
             result.push(
-                <div key={node.positionFEN} className={node === game.getTree().leaf ? "Leaf" : "TreeNode"} onClick={() => onClick(node)}>
+                <div 
+                    key={node.positionFEN} 
+                    className={node === game.getTree().leaf ? "Leaf" : "TreeNode"} 
+                    onClick={isTreeEnabled ? () => onClick(node) : undefined}
+                >
                     {node.move}
                 </div>
             );
@@ -86,10 +91,10 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
 }
 
 const GameTree = (props: Props) => {
-    const {gameTree, game, gameTreeUpdated} = props;
+    const {gameTree, game, gameTreeUpdated, isTreeEnabled} = props;
 
     if (gameTree !== undefined && game !== undefined) {
-        var items = generateItems(game, gameTree, gameTreeUpdated);
+        var items = generateItems(game, gameTree, gameTreeUpdated, isTreeEnabled);
     }
 
     return (
@@ -109,10 +114,11 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {gameTree, game} = state.app;
+    const {gameTree, game, isTreeEnabled} = state.app;
     return {
       gameTree,
-      game
+      game,
+      isTreeEnabled
     };
 };
   

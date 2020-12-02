@@ -18,6 +18,16 @@ const app = (state = initialApp, action: any) => {
                 ...state,
                 game: action.game
             }
+        case 'TREE_MOVEMENT_ENABLED':
+            return {
+                ...state,
+                isTreeEnabled: true
+            };
+        case 'TREE_MOVEMENT_DISABLED':
+            return {
+                ...state,
+                isTreeEnabled: false
+            }
         case 'RESTORE_USER':
             return {
                 ...state,
@@ -41,12 +51,26 @@ const app = (state = initialApp, action: any) => {
                 ...state,
                 config: action.config,
                 newGame: true,
+                componentType: 'game'
             }
         case 'GAME_CREATED':
             return {
                 ...state,
                 newGame: false,
             }
+        case 'NEW_ANALYSIS':
+            return {
+                ...state,
+                newAnalysis: true,
+                movesPGN: action.movesPGN,
+                componentType: 'analysis'
+            }
+        case 'ANALYSIS_CREATED':
+            return {
+                ...state,
+                newAnalysis: false,
+                movesPGN: undefined
+            } 
         default:
             return state;
     }
