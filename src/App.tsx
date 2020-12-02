@@ -9,6 +9,7 @@ import "firebase/auth";
 import {FirebaseAuthProvider} from "@react-firebase/auth";
 
 import GameComponent from './components/GameComponent';
+import GameAnalysis from './components/GameAnalysis';
 import GameTree from "./components/GameTree";
 import './App.css';
 
@@ -68,7 +69,13 @@ function App(props) {
         <FirebaseAuthProvider firebase={firebase} {...config}>
             <div className="App" ref={ref}>
                 <div className="chessBoard">
-                    <GameComponent size={size}/>
+                    { 
+                        props.componentType === 'analysis' ? (
+                            <GameAnalysis size={size}/>
+                        ) : (
+                            <GameComponent size={size}/>
+                        )
+                    }
                 </div>
                 <div className="rightSide">
                     <AccountComponent />
@@ -91,13 +98,14 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {user, dialog, isLoading, isSignout, stackLoading} = state.app;
+    const {user, dialog, isLoading, isSignout, stackLoading, componentType} = state.app;
     return {
         user,
         dialog,
         isLoading,
         isSignout,
         stackLoading,
+        componentType
     };
 };
 

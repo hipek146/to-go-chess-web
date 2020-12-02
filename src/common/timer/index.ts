@@ -14,7 +14,7 @@ let mode = {
 }
 
 // let mode = {
-//     type: 'fisher',
+//     type: 'fischer',
 //     toAdd: 10000
 // }
 

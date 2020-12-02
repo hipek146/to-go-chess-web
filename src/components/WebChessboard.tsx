@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Subject } from 'rxjs';
 import { useEffect, useState, FunctionComponent } from 'react';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
@@ -17,7 +16,6 @@ interface Props {
     onMove: (move: string) => void;
     size: number;
     turn: 'white' | 'black';
-    clearBoard: Subject<void>;
     openDialog: any; 
     closeDialog: any;
     mode: 'onlineGame' | 'singleGame' | 'twoPlayers';
@@ -87,31 +85,30 @@ const generatePromotionItems = (color: 'white' | 'black', callback: (symbol: str
 };
 
 const WebChessboard: FunctionComponent<Props> = (props: Props) => {
-    const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
-    const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
+    const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(props.chessboard.positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
     const { size } = props;
 
     useEffect(() => {
         props.chessboard.callback = (newPosition) => {
+            setBoardInfo(new BoardInfo().fromFEN(newPosition));
             setFirstPress(undefined);
             setLastMove(undefined);
-            setPositionFEN(newPosition);
-            setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };
     });
 
     useEffect(() => {
-        props.clearBoard.subscribe(() => {
-            setFirstPress(undefined);
-            setLastMove(undefined);
-        });
-        return props.clearBoard.unsubscribe;
-    }, []);
+        setBoardInfo(new BoardInfo().fromFEN(props.chessboard.positionFEN));
+    }, [props.chessboard.positionFEN]);
+
+    useEffect(() => {
+        setFirstPress(undefined);
+        setLastMove(undefined);
+    }, [props.chessboard]);
     
     const onPress = (piece: Piece, row: number, column: number) => {
-        if ((props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
+        if (firstPress === undefined && (props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
             return;
         }
         if (piece === firstPress?.piece) {

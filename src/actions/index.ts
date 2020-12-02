@@ -31,3 +31,20 @@ export const gameObjectCreated = (game: any) => ({
     type: 'GAME_OBJECT_CREATED',
     game
 });
+
+export const enableTreeMovement = () => ({
+    type: 'TREE_MOVEMENT_ENABLED'
+});
+
+export const disableTreeMovement = () => ({
+    type: 'TREE_MOVEMENT_DISABLED'
+});
+
+export const createAnalysis = (movesPGN?: string) => ({
+    type: 'NEW_ANALYSIS',
+    movesPGN
+});
+
+export const analysisCreated = () => ({
+    type: 'ANALYSIS_CREATED',
+});

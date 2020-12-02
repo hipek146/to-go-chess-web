@@ -1,48 +1,103 @@
 import React from 'react';
 import './MenuList.css'
 import {bindActionCreators} from "redux";
-import {openDialog, closeDialog, createGame} from "../actions";
+import {openDialog, closeDialog, createGame, createAnalysis} from "../actions";
 import {connect} from 'react-redux';
+import Input from './Input';
 
 const ChooseColor = (props) => {
     return (
         <div>
-            <button onClick={() => props.callback('white')}>Białe</button>
-            <button onClick={() => props.callback('random')}>Losowo</button>
-            <button onClick={() => props.callback('black')}>Czarne</button>
+            Wybierz kolor:
+            <div>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'white'}))}>Białe</button>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'random'}))}>Losowo</button>
+                <button onClick={() => props.openDialog(ChooseClockType({...props, color: 'black'}))}>Czarne</button>
+            </div>
         </div>
     );
 }
 
+const ChooseClockType = (props) => {
+    return (
+        <div>
+            Wybierz tryb czasowy:
+            <div>
+                <button onClick={() => props.callback(props.color, 'standard')}>Standard</button>
+                <button onClick={() => props.callback(props.color, 'fischer')}>Fischer</button>
+            </div>
+        </div>
+    );
+}
 
 const MenuList = (props) => {
     const singleGame = () => {
         props.openDialog(
-            <div>
-                Wybierz kolor:
-                <ChooseColor callback={color => {
-                    props.createGame({mode: 'singleGame', color})
-                    props.back();
-                    props.closeDialog();
-                }}/>
-            </div>
+            <ChooseColor openDialog={props.openDialog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'singleGame', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
         );
     }
     const onlineGame = () => {
         props.openDialog(
-            <div>
-                Wybierz kolor:
-                <ChooseColor callback={color => {
-                    props.createGame({mode: 'onlineGame', color})
-                    props.back();
-                    props.closeDialog();
-                }}/>
-            </div>
+            <ChooseColor openDialog={props.openDialog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'onlineGame', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
         );
     }
     const twoPlayers = () => {
-        props.createGame({mode: 'twoPlayers'});
+        props.openDialog(
+            <ChooseClockType color='white' openDialog={props.openDiaog} callback={(color: string, clockType: string) => {
+                props.createGame({mode: 'twoPlayers', color, clockType})
+                props.back();
+                props.closeDialog();
+            }}/>
+        );
+    }
+    const gameAnalysis = () => {
+        props.createAnalysis();
         props.back();
+    }
+    const onImport = () => {
+        if (props.game) {
+            const onClick = (moves) => {
+                if (moves !== '') {
+                    props.createAnalysis(moves);
+                } 
+                props.closeDialog();
+            }
+            props.openDialog(
+                <Input 
+                    title="Wprowadź grę w postaci PGN:" 
+                    buttonValue="Importuj" 
+                    onClick={onClick}
+                />
+            );
+            props.back();
+        }
+    }
+    const onExport = () => {
+        if (props.game) {
+            const moves = props.game.getTree().toPGN();
+            if (moves !== '') {
+                props.openDialog(
+                    <div style={{padding: 10, maxWidth: 300}}>
+                        {moves}
+                    </div>
+                )
+            } else {
+                props.openDialog(
+                    <div style={{padding: 10}}>
+                        Brak danych do eksportowania.
+                    </div>
+                )
+            }
+            props.back();
+        }
     }
     return (
         <div className="MenuList">
@@ -51,8 +106,9 @@ const MenuList = (props) => {
             <div className="MenuList-button" onClick={onlineGame}>Gra online</div>
             <div className="MenuList-button" onClick={twoPlayers}>Dwoje graczy</div>
             <div className="MenuList-header"/>
-            <div className="MenuList-button MenuList-button-settings">Analiza partii</div>
-            <div className="MenuList-button MenuList-button-settings">Importuj / Eksportuj</div>
+            <div className="MenuList-button MenuList-button-settings" onClick={gameAnalysis}>Analiza partii</div>
+            <div className="MenuList-button MenuList-button-settings"onClick={onImport}>Importuj</div>
+            <div className="MenuList-button MenuList-button-settings" onClick={onExport}>Eksportuj</div>
             <div className="MenuList-button MenuList-button-settings">Ustawienia</div>
         </div>
     );
@@ -63,13 +119,19 @@ const mapDispatchToProps = (dispatch: any) => ({
         {
             openDialog,
             closeDialog,
-            createGame
+            createGame,
+            createAnalysis,
         },
         dispatch,
     ),
 });
 
-const mapStateToProps = (state: any) => ({});
+const mapStateToProps = (state: any) => {
+    const {game} = state.app;
+    return {
+      game,
+    };
+};
 
 const MenuListComponent = connect(
     mapStateToProps,
