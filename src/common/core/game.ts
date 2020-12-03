@@ -6,6 +6,13 @@ import GameTree from '../game_tree/game-tree';
 import ChessClock from "../timer/chess-clock";
 import ChessClockConfig from "../timer/chess-clock-config";
 
+class MockClock {
+    startCountdown = () => {}
+    switchClock = () => {}
+    stopCountdown = () => {}
+    getTimes = () => {}
+};
+
 export class Game {
 	
 	event: Subject<any> = new Subject<any>();
@@ -38,7 +45,7 @@ export class Game {
 		this.blackPlayer = config.blackPlayer;
 		this.boardInfo = new BoardInfo();
 		this.gameTree = new GameTree(this.STARTING_FEN);
-		this.chessClock = new ChessClock(config.chessClockConfig);
+		this.chessClock = config.chessClockConfig ? new ChessClock(config.chessClockConfig): new MockClock();
 		this.draw = false;
 		this.drawOffer = false;
 		this.drawOfferColor = '';

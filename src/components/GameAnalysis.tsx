@@ -5,16 +5,21 @@ import { Chessboard } from '../common/core/chessboard';
 import { bindActionCreators } from "redux";
 import { openDialog, closeDialog, analysisCreated, gameTreeUpdated, gameObjectCreated, enableTreeMovement } from "../actions";
 import { ChessPlayer } from '../common/core/chess-player';
+import ChessClockConfig from '../common/timer/chess-clock-config';
 import WebChessboard from './WebChessboard';
 
-// mock clock
-class ChessClock {
-    startCountdown = () => {}
-    switchClock = () => {}
-    stopCountdown = () => {}
-    getTimes = () => {}
-};
-
+const clockConfig: ChessClockConfig = {
+  initMsBlack: 300 * 1000,
+  initMsWhite: 300 * 1000,
+  stepBlack: 1,
+  stepWhite: 1,
+  mode: {
+    type: 'standard',
+  },
+  endCallback: (winner: string) => {
+    console.log(winner + 'wins');
+  }
+}
 
 interface State {
   size: number;
@@ -76,8 +81,8 @@ class GameAnalysis extends React.Component<Props, State> {
     });
     let wp = new ChessPlayer();
     let bp = new ChessPlayer();
-    let chessClock = new ChessClock();
-    game.init({canvas: chessboard, whitePlayer: wp, chessClockConfig: null, blackPlayer: bp});
+
+    game.init({canvas: chessboard, whitePlayer: wp, chessClockConfig: clockConfig, blackPlayer: bp});
 
     if (moves) {
         const movesArr = moves.split(' ');
