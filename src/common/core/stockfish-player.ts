@@ -1,7 +1,6 @@
 import { Subject } from "rxjs";
 import { BoardInfo } from "./board-info";
 import { Player } from "../interfaces/player";
-var stockfish = require("stockfish");
 
 export class StockfishPlayer implements Player {
     color: 'white' | 'black';
@@ -13,15 +12,13 @@ export class StockfishPlayer implements Player {
 
     constructor(depth: number) {
         this.depth = depth;
-        this.stockfish = stockfish();
+        this.stockfish = new Worker("stockfish.js");
 
         this.stockfish.onmessage = (message) => {
-            let stockfishMove = message.match(this.re);
+            let stockfishMove = message.data.match(this.re);
             if (stockfishMove) {
                 let parsedMove = parseToPGN(this.boardInfo, stockfishMove[1]);
-                if (parsedMove) {
-                    this.move(parsedMove);
-                }
+                this.move(parsedMove);
             }
         };
     }
@@ -35,6 +32,7 @@ export class StockfishPlayer implements Player {
     }
 
     receiveMove(move: string) {
+        console.log(`Received move: ${move}.`)
         this.makeBestMove();
     }
 
@@ -72,8 +70,6 @@ const getIndex = (col) => {
 
 const parseToPGN = (boardInfo: BoardInfo, secondPieceParse: string) => {
     let firstPiece = boardInfo.get(parseInt(secondPieceParse[1]), getIndex(secondPieceParse[0]));
-    if (!firstPiece) return null;
-
     let secondPiece = {
         column: getIndex(secondPieceParse[2]),
         row: parseInt(secondPieceParse[3]),
