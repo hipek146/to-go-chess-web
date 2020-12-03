@@ -19,6 +19,7 @@ import AccountComponent from "./components/AccountComponent";
 import MenuBar from "./components/MenuBar";
 import MenuList from "./components/MenuList";
 import Dialog from "./components/Dialog";
+import Toast from "./components/Toast";
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
@@ -78,6 +79,7 @@ function App(props) {
                     }
                 </div>
                 <div className="rightSide">
+                    {props.toast.content && <Toast />}
                     <AccountComponent />
                     <MenuBar press={(option: string) => onMenuPress(option)} />
                     {openedMenu ? <MenuList back={() => setOpenedMenu(false)}/> : <GameTree/>}
@@ -98,10 +100,11 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {user, dialog, isLoading, isSignout, stackLoading, componentType} = state.app;
+    const {user, dialog, toast, isLoading, isSignout, stackLoading, componentType} = state.app;
     return {
         user,
         dialog,
+        toast,
         isLoading,
         isSignout,
         stackLoading,

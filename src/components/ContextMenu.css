@@ -1,0 +1,49 @@
+.ContextMenu {
+    display: flex;
+    margin: 10px 5px 0;
+}
+
+.ContextMenu-button {
+    background-color: #caebc0;
+    border: 1px solid #707070;
+    flex-basis: 50%;
+    margin: 0 5px 0;
+    padding: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.ContextMenu-button:hover {
+    background-color: #dbf3d4;
+    cursor: pointer;
+}
+.ContextMenu-button_disabled {
+    background-color: #929691;
+}
+.ContextMenu-button_disabled:hover {
+    background-color: #929691;
+    cursor: default;
+}
+
+.ContextMenu-title {
+    margin-bottom: 0;
+    margin-top: auto;
+}
+
+.ContextMenu-icon {
+    height: 25px;
+}
+
+.ContextMenu-draw {
+    height: 40px;
+    position: relative;
+    top: -5px;
+}
+.ContextMenu-surrender {
+    height: 28px;
+    position: relative;
+    top: -2px;
+    transform: rotate(20deg);
+}

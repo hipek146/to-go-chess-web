@@ -1,0 +1,9 @@
+.Toast {
+    padding: 8px;
+    position: absolute;
+    transform: translate(-50%, -100%);
+    left: 50%;
+    top: -10px;
+    background-color: #fffae1;
+    border: 2px solid #707070;
+}

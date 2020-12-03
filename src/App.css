@@ -24,4 +24,5 @@
   box-shadow: 0 0 4px 0 #575757;
   display: flex;
   flex-direction: column;
+  position: relative;
 }

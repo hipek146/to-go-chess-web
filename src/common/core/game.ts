@@ -3,6 +3,8 @@ import { Canvas } from '../interfaces/canvas';
 import { Player } from '../interfaces/player';
 import { BoardInfo } from './board-info';
 import GameTree from '../game_tree/game-tree';
+import ChessClock from "../timer/chess-clock";
+import ChessClockConfig from "../timer/chess-clock-config";
 
 export class Game {
 	
@@ -24,16 +26,22 @@ export class Game {
 
 	private check: boolean;
 	private mate: boolean;
+	private draw: boolean;
+	private drawOffer: boolean;
+	private drawOfferColor: string;
 
 	private STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-	init(config: {canvas: Canvas, whitePlayer: Player, blackPlayer: Player, chessClock: any, positionFEN?: string}) {
+	init(config: {canvas: Canvas, whitePlayer: Player, blackPlayer: Player, chessClockConfig: ChessClockConfig, positionFEN?: string}) {
 		this.canvas = config.canvas;
 		this.whitePlayer = config.whitePlayer;
 		this.blackPlayer = config.blackPlayer;
 		this.boardInfo = new BoardInfo();
 		this.gameTree = new GameTree(this.STARTING_FEN);
-		this.chessClock = config.chessClock;
+		this.chessClock = new ChessClock(config.chessClockConfig);
+		this.draw = false;
+		this.drawOffer = false;
+		this.drawOfferColor = '';
 
 		this.positionFEN = config.positionFEN || this.STARTING_FEN;
 
@@ -53,18 +61,59 @@ export class Game {
 	}
 
 	private onMove(player: Player, move: string) {
-		if (this.boardInfo.turn === player.color) {
+		if (move === 'draw') {
+			if (this.drawOffer && this.drawOfferColor !== player.color) {
+				this.draw = true;
+				this.event.next({type: 'draw', data: ''});
+				if (player.color === 'white') {
+					this.blackPlayer.receiveMove('draw');
+				}
+				else {
+					this.whitePlayer.receiveMove('draw');
+				}
+			}
+			else if (!this.drawOffer) {
+				this.drawOffer = true;
+				if (player.color === 'white') {
+					this.drawOfferColor = 'white';
+					this.blackPlayer.receiveMove('draw');
+					this.event.next({type: 'draw_offer', data: 'white'});
+				} else {
+					this.drawOfferColor = 'black';
+					this.whitePlayer.receiveMove('draw');
+					this.event.next({type: 'draw_offer', data: 'black'});
+				}
+			}
+		} else if (move === 'surrender') {
+			if (player.color === 'white') {
+				this.blackPlayer.receiveMove(move);
+				this.event.next({type: 'surrender', data: 'white'});
+			}
+			else {
+				this.whitePlayer.receiveMove(move);
+				this.event.next({type: 'surrender', data: 'black'});
+			}
+		}
+		else if (this.boardInfo.turn === player.color) {
 			try {
 				move = this.changePosition(move);
 				this.positionFEN = this.boardInfo.toFEN();
 				this.gameTree.addMove(move, this.positionFEN);
 				this.canvas.draw(this.positionFEN);
 				this.chessClock.switchClock();
+				this.drawOffer = false;
+				this.drawOfferColor = '';
 
 				if (player.color === 'white') {
 					if (this.mate) {
 						this.blackPlayer.receiveMove(move + '#');
 						this.event.next({type: 'mate', data: 'white'});
+						this.chessClock.stopCountdown();
+					}
+					else if (this.draw) {
+						this.blackPlayer.receiveMove(move);
+						this.blackPlayer.receiveMove('draw');
+						this.event.next({type: 'draw', data: ''});
 						this.chessClock.stopCountdown();
 					}
 					else if (this.check) {
@@ -78,6 +127,12 @@ export class Game {
 					if (this.mate) {
 						this.whitePlayer.receiveMove(move + '#');
 						this.event.next({type: 'mate', data: 'black'});
+						this.chessClock.stopCountdown();
+					}
+					else if (this.draw) {
+						this.whitePlayer.receiveMove(move);
+						this.whitePlayer.receiveMove('draw');
+						this.event.next({type: 'draw', data: ''});
 						this.chessClock.stopCountdown();
 					}
 					else if (this.check) {
@@ -120,6 +175,9 @@ export class Game {
 
 				this.clearCastling(this.boardInfo.turn);
 				this.boardInfo.halfmoveClock++;
+				if (this.boardInfo.halfmoveClock >= 100) {
+					this.draw = true;
+				}
 				this.finishMove();
 				return move;
 			}
@@ -141,6 +199,9 @@ export class Game {
 
 				this.clearCastling(this.boardInfo.turn);
 				this.boardInfo.halfmoveClock++;
+				if (this.boardInfo.halfmoveClock >= 100) {
+					this.draw = true;
+				}
 				this.finishMove();
 				return move;
 			}
@@ -296,8 +357,15 @@ export class Game {
 			}
 		}
 
+		if (type === 'capture' && !this.boardInfo.hasMateMaterial()) {
+			this.draw = true;
+		}
+
 		if (symbol !== 'p' && type !== 'capture') {
 			this.boardInfo.halfmoveClock++;
+			if (this.boardInfo.halfmoveClock >= 100) {
+				this.draw = true;
+			}
 		}
 		else {
 			this.boardInfo.halfmoveClock = 0;
@@ -318,6 +386,10 @@ export class Game {
 		if (this.check) {
 			this.mate = !this.boardInfo.hasMoves(this.boardInfo.turn === 'white' ? 'black' : 'white');
 		}
+		else if (!this.boardInfo.hasMoves(this.boardInfo.turn === 'white' ? 'black' : 'white')) {
+			this.draw = true;
+		}
+
 
 		if (this.boardInfo.turn === 'black') {
 			this.boardInfo.fullmoveNumber++;
@@ -363,5 +435,9 @@ export class Game {
 	
 	getTree() {
 		return this.gameTree;
+	}
+
+	isDraw() {
+		return this.draw ? true : false;
 	}
 }

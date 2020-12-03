@@ -77,7 +77,7 @@ class GameAnalysis extends React.Component<Props, State> {
     let wp = new ChessPlayer();
     let bp = new ChessPlayer();
     let chessClock = new ChessClock();
-    game.init({canvas: chessboard, whitePlayer: wp, chessClock, blackPlayer: bp});
+    game.init({canvas: chessboard, whitePlayer: wp, chessClockConfig: null, blackPlayer: bp});
 
     if (moves) {
         const movesArr = moves.split(' ');

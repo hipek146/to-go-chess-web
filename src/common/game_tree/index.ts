@@ -17,9 +17,11 @@ gt.setLeaf(m8);
 let m10 = gt.addMove('10', 'pos');
 let m11 = gt.addMove('11', 'pos');
 
-let result = [];
-gt.traverse(gt.root, result)
-console.log(result)
+console.log(gt.toPGN())
+
+// let result = [];
+// gt.traverse(gt.root, result)
+// console.log(result)
 
 // gt.setMainRoute(m7);
 // result = []

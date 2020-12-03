@@ -6,7 +6,15 @@ import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { SocketPlayer } from "../common/core/socket-player";
 import { bindActionCreators } from "redux";
-import { openDialog, closeDialog, gameCreated, gameTreeUpdated, gameObjectCreated, disableTreeMovement } from "../actions";
+import {
+  openDialog,
+  closeDialog,
+  gameCreated,
+  gameTreeUpdated,
+  gameObjectCreated,
+  disableTreeMovement,
+  openToast, closeToast, gameInProgress, drawOffer
+} from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
 import WebChessboard from './WebChessboard';
@@ -38,13 +46,18 @@ interface Props {
   // store
   config, 
   newGame,
+  status,
   // actions 
   openDialog, 
-  closeDialog, 
+  closeDialog,
+  openToast,
+  closeToast,
   gameCreated, 
   gameTreeUpdated, 
   gameObjectCreated, 
-  disableTreeMovement
+  disableTreeMovement,
+  gameInProgress,
+  drawOffer,
 }
 
 class GameComponent extends React.Component<Props, State> {
@@ -53,6 +66,8 @@ class GameComponent extends React.Component<Props, State> {
   ws: WebSocket;
   mode: string;
   clearBoard: Subject<void> = new Subject<void>();
+  me: ChessPlayer;
+  opponentDraw: boolean = false;
 
   constructor(props: Props) {
     super(props);
@@ -69,11 +84,17 @@ class GameComponent extends React.Component<Props, State> {
     this.newGame(undefined, 'standard');
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps:Readonly<Props>) {
     if (this.props.newGame) {
       this.mode = this.props.config.mode;
       this.newGame();
       this.props.gameCreated();
+    }
+    else if (prevProps.status !== 'drawOffered' && this.props.status === 'drawOffered') {
+      this.me.move('draw');
+    }
+    else if (prevProps.status === 'drawOffered' && this.props.status !== 'drawOffered') {
+      this.props.closeToast();
     }
   }
 
@@ -83,6 +104,9 @@ class GameComponent extends React.Component<Props, State> {
 
   newGame(newColor?: string, newClockType?: string) {
     this.clearBoard.next();
+    if (this.props.status !== 'inProgress') {
+      this.props.gameInProgress();
+    }
     if (this.mode === 'onlineGame') {
       this.newOnlineGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
     }
@@ -133,8 +157,42 @@ class GameComponent extends React.Component<Props, State> {
       if (event.type === 'mate') {
         this.onEndGame(event.data)
       }
+      else if (event.type === 'draw') {
+        this.onEndGame('draw');
+      }
+      else if (event.type === 'draw_offer' && this.me.color !== event.data) {
+        this.opponentDraw = true;
+        this.props.openToast(
+            <div>
+              Przeciwnik proponuje remis.
+              <div>
+                <button onClick={() => {
+                  this.me.move('draw');
+                  this.props.closeToast();
+                }}>Akceptuj</button>
+                <button onClick={() => this.props.closeToast()}>Odrzuć</button>
+              </div>
+            </div>
+        );
+      }
     });
-    const me = new ChessPlayer();
+    this.me = new ChessPlayer();
+    const me = this.me;
+
+    /****  DANGEROUS  ******/
+    const superReceiveMove = me.receiveMove;
+    me.receiveMove = (move: string) => {
+      superReceiveMove(move);
+      if (this.opponentDraw) {
+        this.opponentDraw = false;
+        this.props.closeToast();
+      }
+      if (this.props.status !== 'inProgress') {
+        this.props.gameInProgress();
+      }
+    }
+    /********** ********/
+
     let wp;
     let bp;
     if (this.color === 'white') {
@@ -153,7 +211,7 @@ class GameComponent extends React.Component<Props, State> {
       toAdd: 5000
     }
     let chessClock = new ChessClock(clockConfig);
-    game.init({canvas: chessboard, whitePlayer: wp, chessClock, blackPlayer: bp});
+    game.init({canvas: chessboard, whitePlayer: wp, chessClockConfig: clockConfig, blackPlayer: bp});
     if (this.mode === 'singleGame') {
       // @ts-ignore
       opponent.setBoardInfo(game.getBoardInfo());
@@ -173,10 +231,14 @@ class GameComponent extends React.Component<Props, State> {
   }
 
   onEndGame(status) {
+    if (this.opponentDraw) {
+      this.opponentDraw = false;
+      this.props.closeToast();
+    }
     this.props.openDialog(
         <>
           <div>
-            {status === 'draw' && 'Remis'}
+            {status === 'draw' && 'Partia zakończona remisem'}
             {status === 'white' && 'Wygrywają białe'}
             {status === 'black' && 'Wygrywają czarne'}
           </div>
@@ -196,6 +258,9 @@ class GameComponent extends React.Component<Props, State> {
     } = this.state;
 
     const onMove = (move: string) => {
+      if (this.props.status !== 'inProgress') {
+        this.props.gameInProgress();
+      }
       if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
         currentPlayer.move(move);
       }
@@ -246,20 +311,25 @@ const mapDispatchToProps = (dispatch: any) => ({
       {
         openDialog,
         closeDialog,
+        openToast,
+        closeToast,
         gameCreated,
         gameTreeUpdated,
         gameObjectCreated,
-        disableTreeMovement
+        disableTreeMovement,
+        gameInProgress,
+        drawOffer,
       },
       dispatch,
   ),
 });
 
 const mapStateToProps = (state: any) => {
-  const {config, newGame} = state.app;
+  const {config, newGame, status} = state.app;
   return {
     config,
     newGame,
+    status,
   };
 };
 

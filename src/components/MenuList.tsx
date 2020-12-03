@@ -1,9 +1,10 @@
 import React from 'react';
 import './MenuList.css'
 import {bindActionCreators} from "redux";
+import { connect } from 'react-redux'
 import {openDialog, closeDialog, createGame, createAnalysis} from "../actions";
-import {connect} from 'react-redux';
 import Input from './Input';
+import ContextMenu from './ContextMenu';
 
 const ChooseColor = (props) => {
     return (
@@ -101,6 +102,7 @@ const MenuList = (props) => {
     }
     return (
         <div className="MenuList">
+            <ContextMenu />
             <div className="MenuList-header">Nowa gra</div>
             <div className="MenuList-button" onClick={singleGame}>Gra z komputerem</div>
             <div className="MenuList-button" onClick={onlineGame}>Gra online</div>

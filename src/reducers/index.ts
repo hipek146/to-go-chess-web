@@ -3,7 +3,8 @@ import {combineReducers} from 'redux';
 const initialApp = {
     isSignout: false,
     user: null,
-    dialog: {}
+    dialog: {},
+    toast: {},
 };
 
 const app = (state = initialApp, action: any) => {
@@ -46,10 +47,23 @@ const app = (state = initialApp, action: any) => {
                 ...state,
                 dialog: {},
             }
+        case 'OPEN_TOAST':
+            return {
+                ...state,
+                toast: {
+                    content: action.content
+                },
+            }
+        case 'CLOSE_TOAST':
+            return {
+                ...state,
+                toast: {},
+            }
         case 'NEW_GAME':
             return {
                 ...state,
                 config: action.config,
+                status: 'inProgress',
                 newGame: true,
                 componentType: 'game'
             }
@@ -70,7 +84,22 @@ const app = (state = initialApp, action: any) => {
                 ...state,
                 newAnalysis: false,
                 movesPGN: undefined
-            } 
+            }
+        case 'DRAW_OFFERED':
+            return {
+            ...state,
+            status: 'drawOffered',
+        }
+        case 'SURRENDERED':
+            return {
+                ...state,
+                status: 'surrendered',
+            }
+        case 'GAME_IN_PROGRESS':
+            return {
+                ...state,
+                status: 'inProgress',
+            }
         default:
             return state;
     }
