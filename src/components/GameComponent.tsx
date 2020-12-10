@@ -90,11 +90,14 @@ class GameComponent extends React.Component<Props, State> {
       this.newGame();
       this.props.gameCreated();
     }
-    else if (prevProps.status !== 'drawOffered' && this.props.status === 'drawOffered') {
+    if (prevProps.status !== 'drawOffered' && this.props.status === 'drawOffered') {
       this.me.move('draw');
     }
-    else if (prevProps.status === 'drawOffered' && this.props.status !== 'drawOffered') {
+    if (prevProps.status === 'drawOffered' && this.props.status !== 'drawOffered') {
       this.props.closeToast();
+    }
+    if (prevProps.status !== 'surrendered' && this.props.status === 'surrendered') {
+      this.me.move('surrender');
     }
   }
 
@@ -104,6 +107,10 @@ class GameComponent extends React.Component<Props, State> {
 
   newGame(newColor?: string, newClockType?: string) {
     this.clearBoard.next();
+    if (this.opponentDraw) {
+      this.opponentDraw = false;
+      this.props.closeToast();
+    }
     if (this.props.status !== 'inProgress') {
       this.props.gameInProgress();
     }
@@ -175,6 +182,9 @@ class GameComponent extends React.Component<Props, State> {
             </div>
         );
       }
+      else if (event.type === 'surrender') {
+        this.onEndGame(this.me.color === event.data ? 'me_surrender' : 'opponent_surrender');
+      }
     });
     this.me = new ChessPlayer();
     const me = this.me;
@@ -189,6 +199,7 @@ class GameComponent extends React.Component<Props, State> {
       }
       if (this.props.status !== 'inProgress') {
         this.props.gameInProgress();
+        console.log('co jest');
       }
     }
     /********** ********/
@@ -241,6 +252,8 @@ class GameComponent extends React.Component<Props, State> {
             {status === 'draw' && 'Partia zakończona remisem'}
             {status === 'white' && 'Wygrywają białe'}
             {status === 'black' && 'Wygrywają czarne'}
+            {status === 'me_surrender' && 'Poddałeś się'}
+            {status === 'opponent_surrender' && 'Przeciwnik się poddał'}
           </div>
           <div><button onClick={() => {
             const color = this.color === 'white' ? 'black' : 'white';
@@ -258,6 +271,10 @@ class GameComponent extends React.Component<Props, State> {
     } = this.state;
 
     const onMove = (move: string) => {
+      if (this.opponentDraw) {
+        this.opponentDraw = false;
+        this.props.closeToast();
+      }
       if (this.props.status !== 'inProgress') {
         this.props.gameInProgress();
       }
