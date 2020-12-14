@@ -436,6 +436,10 @@ export class Game {
 		this.chessClock.stopCountdown();
 	}
 
+	getChessClock() {
+		return this.chessClock;
+	}
+
 	getTurn() {
 		return this.boardInfo.turn;
 	}

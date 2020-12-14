@@ -56,6 +56,11 @@ class ChessClock {
         }
     }
 
+    setTimes = (times: any) => {
+        this.timerWhite.setTime(times.timeWhite.fullMs);
+        this.timerBlack.setTime(times.timeBlack.fullMs);
+    }
+
     private setCheckInterval = () => {
         this.checkWinnerInterval = setInterval(() => {
             if(this.timerWhite.isFinished()) {

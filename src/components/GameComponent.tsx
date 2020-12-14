@@ -20,7 +20,6 @@ import { ChessPlayer } from '../common/core/chess-player';
 import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameInfo from './GameInfo';
-import ChessClock from '../common/timer/chess-clock';
 import emotes from "../utils/emotes";
 import "./GameComponent.css"
 
@@ -83,7 +82,7 @@ class GameComponent extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
+  componentDidMount() { 
     this.mode = 'twoPlayers';
     this.newGame(undefined, 'standard');
   }
@@ -155,7 +154,7 @@ class GameComponent extends React.Component<Props, State> {
       )
     }
     this.ws.onopen = () => {
-      this.ws.send(JSON.stringify({type: 'newGame', color}));
+      this.ws.send(JSON.stringify({type: 'newGame', color, clockType}));
     }
     this.ws.onmessage = (event) => {
       let msg = JSON.parse(String(event.data));
@@ -243,7 +242,6 @@ class GameComponent extends React.Component<Props, State> {
       type: clockType,
       toAdd: 5000
     }
-    let chessClock = new ChessClock(clockConfig);
     game.init({canvas: chessboard, whitePlayer: wp, chessClockConfig: clockConfig, blackPlayer: bp});
     if (this.mode === 'singleGame') {
       // @ts-ignore
@@ -252,6 +250,10 @@ class GameComponent extends React.Component<Props, State> {
         // @ts-ignore
         opponent.makeFirstMove();
       }
+    }
+    else if (this.mode === 'onlineGame') {
+      //@ts-ignore
+      opponent.setChessClock(game.getChessClock());
     }
 
     this.props.gameObjectCreated(game);
@@ -280,7 +282,7 @@ class GameComponent extends React.Component<Props, State> {
           <div><button onClick={() => {
             const color = this.color === 'white' ? 'black' : 'white';
             this.props.closeDialog();
-            this.newGame(color);
+            this.newGame(color, clockConfig.mode.type);
           }}>Zagraj jeszcze raz</button></div>
         </>
     )

@@ -22,8 +22,10 @@ class Timer {
         }
 
         this.running = true;
+        let loopTime = Date.now();
         this.interval = setInterval(() => {
-            this.ms -= this.step * 10;
+            this.ms -= this.step * (Date.now() - loopTime);
+            loopTime = Date.now();
             if (this.ms <= 0) {
                 this.finished = true;
                 clearInterval(this.interval);
@@ -45,6 +47,11 @@ class Timer {
         this.start();
     }
 
+    setTime = (ms: number) => {
+        console.log(ms)
+        this.ms = ms;
+    }
+
     getTime = () => {
         let ms = this.ms % 1000;
         let seconds = Math.floor(this.ms / 1000);
@@ -52,9 +59,10 @@ class Timer {
         seconds = seconds % 60;
     
         return {
+            fullMs: this.ms,
             minutes,
             seconds,
-            ms
+            ms,
         };
     }
 
