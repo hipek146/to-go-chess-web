@@ -51,7 +51,8 @@ const app = (state = initialApp, action: any) => {
             return {
                 ...state,
                 toast: {
-                    content: action.content
+                    content: action.content,
+                    options: action.options,
                 },
             }
         case 'CLOSE_TOAST':
@@ -99,6 +100,16 @@ const app = (state = initialApp, action: any) => {
             return {
                 ...state,
                 status: 'inProgress',
+            }
+        case 'SEND_EMOTE':
+            return {
+                ...state,
+                emoteToSend: action.index,
+            }
+        case 'EMOTE_SENT':
+            return {
+                ...state,
+                emoteToSend: undefined,
             }
         default:
             return state;

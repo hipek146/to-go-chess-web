@@ -5,6 +5,7 @@
     border-top: 1px solid #575757;
     border-bottom: 1px solid #575757;
     display: flex;
+    position: relative;
 }
 .MenuBar-button {
     flex-grow: 1;
@@ -12,8 +13,34 @@
     border: 1px solid #575757;
     background: rgba(78, 219, 83, 0.55);
     user-select: none;
+    position: relative;
 }
 .MenuBar-button:hover {
     cursor: pointer;
     background: rgba(97, 239, 102, 0.7);
+}
+
+.MenuBar-emote {
+    height: 40px;
+    width: 40px;
+    margin: 2px;
+    padding: 2px;
+}
+.MenuBar-emote:hover {
+    cursor: pointer;
+    box-shadow: 0 0 2px 1px #707070;
+}
+
+.MenuBar-emotesDialog {
+    position: absolute;
+    background-color: #fffae1;
+    border: 2px solid #707070;
+    display: flex;
+    flex-wrap: wrap;
+    right: 4px;
+    top: 37px;
+    width: 150px;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
 }

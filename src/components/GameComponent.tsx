@@ -13,7 +13,7 @@ import {
   gameTreeUpdated,
   gameObjectCreated,
   disableTreeMovement,
-  openToast, closeToast, gameInProgress, drawOffer
+  openToast, closeToast, gameInProgress, drawOffer, emoteSent
 } from "../actions";
 import { StockfishPlayer } from '../common/core/stockfish-player';
 import { ChessPlayer } from '../common/core/chess-player';
@@ -21,6 +21,8 @@ import WebChessboard from './WebChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameInfo from './GameInfo';
 import ChessClock from '../common/timer/chess-clock';
+import emotes from "../utils/emotes";
+import "./GameComponent.css"
 
 const clockConfig: ChessClockConfig = {
   initMsBlack: 300 * 1000,
@@ -47,6 +49,7 @@ interface Props {
   config, 
   newGame,
   status,
+  emoteToSend,
   // actions 
   openDialog, 
   closeDialog,
@@ -58,6 +61,7 @@ interface Props {
   disableTreeMovement,
   gameInProgress,
   drawOffer,
+  emoteSent,
 }
 
 class GameComponent extends React.Component<Props, State> {
@@ -98,6 +102,12 @@ class GameComponent extends React.Component<Props, State> {
     }
     if (prevProps.status !== 'surrendered' && this.props.status === 'surrendered') {
       this.me.move('surrender');
+    }
+    if (this.props.emoteToSend !== undefined) {
+      if (this.ws) {
+        this.ws.send(JSON.stringify({type: 'emote', emote: this.props.emoteToSend}));
+      }
+      this.props.emoteSent();
     }
   }
 
@@ -153,6 +163,19 @@ class GameComponent extends React.Component<Props, State> {
         this.props.closeDialog();
         this.color = msg.color;
         this.init(new SocketPlayer(this.ws), clockType);
+        /****  DANGEROUS  ******/
+        const socketOnMessage = this.ws.onmessage;
+        this.ws.onmessage = (event) => {
+          socketOnMessage.call(this.ws, event);
+          let msg = JSON.parse(String(event.data));
+          if (msg.type === 'emote') {
+            const emote = emotes.find(emote => emote.index === msg.emote);
+            if (emote) {
+              this.props.openToast(<img src={emote.res} className="GameComponent-emote" />, {fade: true});
+            }
+          }
+        }
+        /********** ********/
       }
     };
   }
@@ -199,7 +222,6 @@ class GameComponent extends React.Component<Props, State> {
       }
       if (this.props.status !== 'inProgress') {
         this.props.gameInProgress();
-        console.log('co jest');
       }
     }
     /********** ********/
@@ -336,17 +358,19 @@ const mapDispatchToProps = (dispatch: any) => ({
         disableTreeMovement,
         gameInProgress,
         drawOffer,
+        emoteSent,
       },
       dispatch,
   ),
 });
 
 const mapStateToProps = (state: any) => {
-  const {config, newGame, status} = state.app;
+  const {config, newGame, status, emoteToSend} = state.app;
   return {
     config,
     newGame,
     status,
+    emoteToSend,
   };
 };
 
