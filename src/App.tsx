@@ -71,10 +71,10 @@ function App(props) {
             <div className="App" ref={ref}>
                 <div className="chessBoard">
                     { 
-                        props.componentType === 'analysis' ? (
-                            <GameAnalysis size={size}/>
-                        ) : (
+                        props.componentType === 'game' ? (
                             <GameComponent size={size}/>
+                            ) : (
+                            <GameAnalysis size={size}/>
                         )
                     }
                 </div>

@@ -54,10 +54,8 @@ class GameAnalysis extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.newAnalysis) {
-        this.newGame(this.props.movesPGN);
-        this.props.analysisCreated();
-    }
+      this.newGame(this.props.movesPGN);
+      this.props.analysisCreated();
   }
 
   componentDidUpdate() {

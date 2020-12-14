@@ -98,7 +98,7 @@ const GameTree = (props: Props) => {
     }
 
     return (
-        <div className="GameTree">
+        <div className={isTreeEnabled ? "GameTree Enabled" : "GameTree Disabled" }>
             {items}
         </div>
     );
