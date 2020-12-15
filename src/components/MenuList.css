@@ -35,3 +35,7 @@
 .MenuList-button-settings:hover {
     background-color: #f5f3e1;
 }
+
+.MenuList-switch {
+    margin-top: 10px;
+}

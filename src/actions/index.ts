@@ -79,3 +79,11 @@ export const sendEmote = (index) => ({
 export const emoteSent = () => ({
     type: 'EMOTE_SENT'
 });
+
+export const rotateChessboard = () => ({
+    type: 'CHESSBOARD_ROTATED'
+});
+
+export const toggleAutomaticRotation = () => ({
+    type: 'TOGGLE_CHESSBOARD_ROTATION'
+});

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './MenuBar.css'
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
-import {gameTreeUpdated, openToast, sendEmote} from "../actions";
+import {gameTreeUpdated, openToast, sendEmote, rotateChessboard} from "../actions";
 import { ReactComponent as Menu } from "../images/menu-24px.svg"
 import { ReactComponent as Before } from "../images/navigate_before-24px.svg"
 import { ReactComponent as Next } from "../images/navigate_next-24px.svg"
@@ -11,7 +11,7 @@ import { ReactComponent as Emote } from "../images/tag_faces-24px.svg"
 import emotes from "../utils/emotes";
 
 
-interface Props {press, game, gameTreeUpdated, isTreeEnabled, openToast, sendEmote}
+interface Props {press, game, gameTreeUpdated, isTreeEnabled, openToast, sendEmote, rotateChessboard}
 
 const MenuBar = (props: Props) => {
     const [emotesDialog, setEmotesDialog] = useState(false);
@@ -36,6 +36,10 @@ const MenuBar = (props: Props) => {
     const onEmoteClick = () => {
         setEmotesDialog(false);
         window.removeEventListener('click', onEmoteClick);
+    }
+
+    const onRotateClick = () => {
+        props.rotateChessboard(false);
     }
 
     useEffect(() => {
@@ -67,7 +71,7 @@ const MenuBar = (props: Props) => {
                     fill={'#efe788'}
                 />
             </div>
-            <div className="MenuBar-button">
+            <div className="MenuBar-button" onClick={onRotateClick}>
                 <Swap
                     height="100%"
                     style={{transform: 'scale(1.1)'}}
@@ -95,6 +99,7 @@ const mapDispatchToProps = (dispatch: any) => ({
             gameTreeUpdated,
             openToast,
             sendEmote,
+            rotateChessboard
         },
         dispatch,
     ),

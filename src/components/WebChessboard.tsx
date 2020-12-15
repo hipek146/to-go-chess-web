@@ -19,6 +19,8 @@ interface Props {
     openDialog: any; 
     closeDialog: any;
     mode: 'onlineGame' | 'singleGame' | 'twoPlayers';
+    chessboardRotated: boolean;
+    rotateAutomatically: boolean;
 }
 
 interface LastMove {
@@ -34,10 +36,21 @@ interface FirstPress {
     possibleMoves: Move[];
 }
 
-const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined)  => {
+const generateGridItems = (boardInfo: BoardInfo, onClick: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined, rotate: boolean)  => {
     let items: any[] = [];
 
-    for(let row = 8; row >= 1; row--) {
+    var startRow, checkCondition, iterate;
+    if (rotate) {
+        startRow = 1;
+        checkCondition = (row) => row <= 8;
+        iterate = (row) => row + 1;
+    } else {
+        startRow = 8;
+        checkCondition = (row) => row >= 1;
+        iterate = (row) => row - 1;
+    }
+
+    for(let row = startRow; checkCondition(row); row = iterate(row)) {
         for(let column = 1; column <= 8; column++) {
             let piece = boardInfo.get(row, column);
             let svg = getComponent(piece);
@@ -182,7 +195,10 @@ const WebChessboard: FunctionComponent<Props> = (props: Props) => {
         } 
     };
 
-    const items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
+    const items = generateGridItems(
+        boardInfo, onPress, firstPress, lastMove, 
+        (props.rotateAutomatically && boardInfo.turn === 'black') ? !props.chessboardRotated : props.chessboardRotated
+    ); // last argument is simple logical XOR
 
     return (
         <div style={{width: size, height: size}}>
@@ -205,7 +221,13 @@ const mapDispatchToProps = (dispatch: any) => ({
     ),
 });
 
-const mapStateToProps = (state: any) => ({});
+const mapStateToProps = (state: any) => {
+    const {rotateAutomatically, chessboardRotated} = state.app;
+    return {
+        rotateAutomatically,
+        chessboardRotated
+    };
+};
 
 const WrappedWebChessboard = connect(
     mapStateToProps,

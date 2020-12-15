@@ -2,7 +2,9 @@ import React, {useEffect, useState} from 'react';
 import './MenuList.css'
 import {bindActionCreators} from "redux";
 import { connect } from 'react-redux'
-import {openDialog, closeDialog, createGame, createAnalysis} from "../actions";
+import {openDialog, closeDialog, createGame, createAnalysis, toggleAutomaticRotation} from "../actions";
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Input from './Input';
 import ContextMenu from './ContextMenu';
 import firebase from "firebase/app";
@@ -33,6 +35,8 @@ const ChooseClockType = (props) => {
 }
 
 const MenuList = (props) => {
+    const [settingsOpenend, setSettingsOpened] = useState(false);
+
     const singleGame = () => {
         props.openDialog(
             <ChooseColor openDialog={props.openDialog} callback={(color: string, clockType: string) => {
@@ -156,18 +160,43 @@ const MenuList = (props) => {
         }
     }
     return (
-        <div className="MenuList">
-            <ContextMenu />
-            <div className="MenuList-header">Nowa gra</div>
-            <div className="MenuList-button" onClick={singleGame}>Gra z komputerem</div>
-            <div className="MenuList-button" onClick={onlineGame}>Gra online</div>
-            <div className="MenuList-button" onClick={twoPlayers}>Dwoje graczy</div>
-            <div className="MenuList-header"/>
-            <div className="MenuList-button MenuList-button-settings" onClick={gameAnalysis}>Analiza partii</div>
-            <div className="MenuList-button MenuList-button-settings"onClick={onImport}>Importuj</div>
-            <div className="MenuList-button MenuList-button-settings" onClick={onExport}>Eksportuj</div>
-            <div className="MenuList-button MenuList-button-settings">Ustawienia</div>
-        </div>
+        <>
+            {
+                settingsOpenend ?
+                (
+                    <div className="MenuList">
+                        <ContextMenu />
+                        <div className="MenuList-header">Ustawienia gry</div>
+                        <FormControlLabel
+                            control={
+                                <Switch 
+                                onChange={props.toggleAutomaticRotation}
+                                checked={props.rotateAutomatically}
+                                color="primary"
+                                />
+                            }
+                            className="MenuList-switch"
+                            label="Automatyczne obracanie szachownicy"
+                        />
+                    </div>
+                )
+                :
+                (
+                    <div className="MenuList">
+                        <ContextMenu />
+                        <div className="MenuList-header">Nowa gra</div>
+                        <div className="MenuList-button" onClick={singleGame}>Gra z komputerem</div>
+                        <div className="MenuList-button" onClick={onlineGame}>Gra online</div>
+                        <div className="MenuList-button" onClick={twoPlayers}>Dwoje graczy</div>
+                        <div className="MenuList-header"/>
+                        <div className="MenuList-button MenuList-button-settings" onClick={gameAnalysis}>Analiza partii</div>
+                        <div className="MenuList-button MenuList-button-settings"onClick={onImport}>Importuj</div>
+                        <div className="MenuList-button MenuList-button-settings" onClick={onExport}>Eksportuj</div>
+                        <div className="MenuList-button MenuList-button-settings" onClick={() => setSettingsOpened(true)}>Ustawienia</div>
+                    </div>
+                )
+            }
+        </>
     );
 }
 
@@ -178,15 +207,16 @@ const mapDispatchToProps = (dispatch: any) => ({
             closeDialog,
             createGame,
             createAnalysis,
+            toggleAutomaticRotation
         },
         dispatch,
     ),
 });
 
 const mapStateToProps = (state: any) => {
-    const {game, user} = state.app;
+    const {game, user, rotateAutomatically} = state.app;
     return {
-      game, user,
+      game, user, rotateAutomatically
     };
 };
 

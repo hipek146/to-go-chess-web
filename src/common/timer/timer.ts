@@ -27,6 +27,7 @@ class Timer {
             this.ms -= this.step * (Date.now() - loopTime);
             loopTime = Date.now();
             if (this.ms <= 0) {
+                this.ms = 0;
                 this.finished = true;
                 clearInterval(this.interval);
             }
