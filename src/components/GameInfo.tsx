@@ -19,6 +19,7 @@ export const GameInfo: FunctionComponent<Props> = (props: Props) => {
 
     return (
         <div className='PlayerInfo'>
+            <div className='WhiteBox'/>
             <div className='TimersContainer'>
                 <p className='Timer'> 
                     { time ?
@@ -43,6 +44,7 @@ export const GameInfo: FunctionComponent<Props> = (props: Props) => {
                     } 
                 </p>
             </div>
+            <div className='BlackBox'/>
         </div>
     )
 };

@@ -7,6 +7,8 @@ body {
     background-image: url('../images/chessboard.png');
     background-size: contain;
     background-repeat: no-repeat;
+    min-width: 500px;
+    min-height: 500px;
 }
 
 .chessboard {
@@ -18,6 +20,8 @@ body {
     flex-wrap: wrap;
     margin: 0;
     padding: 0;
+    min-width: 500px;
+    min-height: 500px;
 }
 
 .square {

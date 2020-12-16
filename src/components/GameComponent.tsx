@@ -89,6 +89,9 @@ class GameComponent extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps:Readonly<Props>) {
     if (this.props.newGame) {
+      if (this.state.game) {
+        this.state.game.stopClock();
+      }
       this.mode = this.props.config.mode;
       this.newGame();
       this.props.gameCreated();
@@ -107,6 +110,12 @@ class GameComponent extends React.Component<Props, State> {
         this.ws.send(JSON.stringify({type: 'emote', emote: this.props.emoteToSend}));
       }
       this.props.emoteSent();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.state.game) {
+        this.state.game.stopClock();
     }
   }
 
@@ -327,7 +336,7 @@ class GameComponent extends React.Component<Props, State> {
                 chessboard={game.getChessboard()}
                 turn={this.color}
                 mode={this.mode}
-                size={this.state.size}
+                size={this.state.size - 90}
               /> 
             </>
             : undefined

@@ -39,7 +39,7 @@ const MenuBar = (props: Props) => {
     }
 
     const onRotateClick = () => {
-        props.rotateChessboard(false);
+        props.rotateChessboard();
     }
 
     useEffect(() => {
