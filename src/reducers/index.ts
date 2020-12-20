@@ -7,6 +7,7 @@ const initialApp = {
     chessboardRotated: false,
     dialog: {},
     toast: {},
+    botLevel: 10,
 };
 
 const app = (state = initialApp, action: any) => {
@@ -122,6 +123,11 @@ const app = (state = initialApp, action: any) => {
             return {
                 ...state,
                 chessboardRotated: !state.chessboardRotated
+            }
+        case 'BOT_LEVEL_CHANGED':
+            return {
+                ...state,
+                botLevel: action.botLevel
             }
         default:
             return state;

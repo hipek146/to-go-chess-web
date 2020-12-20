@@ -87,3 +87,8 @@ export const rotateChessboard = () => ({
 export const toggleAutomaticRotation = () => ({
     type: 'TOGGLE_CHESSBOARD_ROTATION'
 });
+
+export const changeBotLevel = (botLevel: number) => ({
+    type: 'BOT_LEVEL_CHANGED',
+    botLevel
+});

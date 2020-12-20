@@ -2,12 +2,14 @@ import React, {useEffect, useState} from 'react';
 import './MenuList.css'
 import {bindActionCreators} from "redux";
 import { connect } from 'react-redux'
-import {openDialog, closeDialog, createGame, createAnalysis, toggleAutomaticRotation} from "../actions";
+import {openDialog, closeDialog, createGame, createAnalysis, toggleAutomaticRotation, changeBotLevel} from "../actions";
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Input from './Input';
 import ContextMenu from './ContextMenu';
 import firebase from "firebase/app";
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 const ChooseColor = (props) => {
     return (
@@ -170,13 +172,29 @@ const MenuList = (props) => {
                         <FormControlLabel
                             control={
                                 <Switch 
-                                onChange={props.toggleAutomaticRotation}
-                                checked={props.rotateAutomatically}
-                                color="primary"
+                                    onChange={props.toggleAutomaticRotation}
+                                    checked={props.rotateAutomatically}
+                                    color="primary"
+                                    className="MenuList-switch"
                                 />
                             }
-                            className="MenuList-switch"
+                            className="MenuList-switch-label"
                             label="Automatyczne obracanie szachownicy"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Select
+                                    value={props.botLevel}
+                                    onChange={e => props.changeBotLevel(e.target.value)}
+                                    className="MenuList-select"
+                                >
+                                    <MenuItem value={5}>5</MenuItem>
+                                    <MenuItem value={10}>10</MenuItem>
+                                    <MenuItem value={15}>15</MenuItem>
+                                </Select>
+                            }
+                            className="MenuList-select-label"
+                            label="Poziom trudności silnika"
                         />
                     </div>
                 )
@@ -207,16 +225,17 @@ const mapDispatchToProps = (dispatch: any) => ({
             closeDialog,
             createGame,
             createAnalysis,
-            toggleAutomaticRotation
+            toggleAutomaticRotation,
+            changeBotLevel
         },
         dispatch,
     ),
 });
 
 const mapStateToProps = (state: any) => {
-    const {game, user, rotateAutomatically} = state.app;
+    const {game, user, rotateAutomatically, botLevel} = state.app;
     return {
-      game, user, rotateAutomatically
+      game, user, rotateAutomatically, botLevel
     };
 };
 

@@ -36,6 +36,23 @@
     background-color: #f5f3e1;
 }
 
-.MenuList-switch {
+.MenuList-switch-label {
     margin-top: 10px;
+    margin-left: 20px !important; 
+    float: left;
+}
+
+.MenuList-select-label {
+    margin-left: 30px !important; 
+    margin-top: 10px;
+    float: left;
+}
+
+.MenuList-select {
+    margin-right: 15px;
+    width: 45px;
+}
+
+.MenuList-switch {
+    margin-right: 10px;
 }

@@ -61,6 +61,7 @@ interface Props {
   gameInProgress,
   drawOffer,
   emoteSent,
+  botLevel
 }
 
 class GameComponent extends React.Component<Props, State> {
@@ -136,12 +137,12 @@ class GameComponent extends React.Component<Props, State> {
       this.newOnlineGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
     }
     else if (this.mode === 'twoPlayers') {
-      this.color = 'white'
+      this.color = 'white';
       this.init(new ChessPlayer(),  newClockType || this.props.config.clockType);
     }
     else if (this.mode === 'singleGame') {
       this.color = this.props.config.color;
-      this.init(new StockfishPlayer(15),  newClockType || this.props.config.clockType);
+      this.init(new StockfishPlayer(this.props.botLevel),  newClockType || this.props.config.clockType);
     }
   }
 
@@ -376,12 +377,13 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-  const {config, newGame, status, emoteToSend} = state.app;
+  const {config, newGame, status, emoteToSend, botLevel} = state.app;
   return {
     config,
     newGame,
     status,
     emoteToSend,
+    botLevel
   };
 };
 
