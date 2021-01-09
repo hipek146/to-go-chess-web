@@ -11,7 +11,3 @@ To run web application, execute:
 ```bash
 npm start
 ```
-
-# Heroku
-
-App is hosted on heroku: https://dashboard.heroku.com/apps/to-go-chess
